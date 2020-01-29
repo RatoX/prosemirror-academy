@@ -22,6 +22,7 @@ export const createTextFormattingPlugin = (): Plugin<StateField<
           strongDisabled: false,
           strongActive: false,
           headingActive: null,
+          textAlignmentStatus: false,
         };
       },
 

@@ -6,6 +6,7 @@ export type TextFormattingPluginState = {
   strongDisabled: boolean;
   strongActive: boolean;
   headingActive: number | null;
+  textAlignmentStatus: 'left' | 'center' | 'right' | false;
 };
 export type PluginState = TextFormattingPluginState;
 

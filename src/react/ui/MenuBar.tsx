@@ -5,6 +5,7 @@ import {
   toggleStrongMark,
   createCodeBlock,
   createHeading,
+  toggleTextAlignment,
 } from '../../prosemirror/commands';
 
 type MenuBarProps = EditorContextType & {
@@ -69,6 +70,49 @@ const HeadingMenuItem = ({
   );
 };
 
+const TextAlignmentMenuItem = ({
+  editorView: { state, dispatch },
+  pluginState,
+}: MenuItem<TextFormattingPluginState>) => {
+  const onClickLeft = useCallback(() => {
+    toggleTextAlignment('left')(state, dispatch);
+  }, [state, dispatch]);
+  const onClickCenter = useCallback(() => {
+    toggleTextAlignment('center')(state, dispatch);
+  }, [state, dispatch]);
+  const onClickRight = useCallback(() => {
+    toggleTextAlignment('right')(state, dispatch);
+  }, [state, dispatch]);
+
+  const { textAlignmentStatus } = pluginState || {};
+
+  return (
+    <>
+      <button
+        data-actived={textAlignmentStatus === 'left'}
+        disabled={!textAlignmentStatus}
+        onClick={onClickLeft}
+      >
+        LEFT
+      </button>
+      <button
+        data-actived={textAlignmentStatus === 'left'}
+        disabled={!textAlignmentStatus}
+        onClick={onClickCenter}
+      >
+        CENTER
+      </button>
+      <button
+        data-actived={textAlignmentStatus === 'left'}
+        disabled={!textAlignmentStatus}
+        onClick={onClickRight}
+      >
+        RIGHT
+      </button>
+    </>
+  );
+};
+
 const MenuBar = ({ editorView, editorPluginStates }: MenuBarProps) => {
   const { textFormattingPluginState } = editorPluginStates;
 
@@ -97,6 +141,11 @@ const MenuBar = ({ editorView, editorPluginStates }: MenuBarProps) => {
         editorView={editorView}
         pluginState={textFormattingPluginState}
         level={3}
+      />
+
+      <TextAlignmentMenuItem
+        editorView={editorView}
+        pluginState={textFormattingPluginState}
       />
     </div>
   );
