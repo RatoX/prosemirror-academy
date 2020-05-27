@@ -36,10 +36,32 @@ export const nodes: { [key: string]: NodeSpec } = {
     inline: true,
     attrs: { anything: { default: 'TODO' } },
     group: 'inline',
+    parseDOM: [
+      {
+        tag: 'mark',
+        getAttrs: domNode => {
+          if (domNode instanceof HTMLElement) {
+            const anything = domNode.getAttribute('data-anything');
+
+            return {
+              anything,
+            };
+          }
+
+          return false;
+        },
+      },
+    ],
     toDOM(node) {
       const attrs = node.attrs;
 
-      return ['span', ['strong', attrs.anything]];
+      return [
+        'mark',
+        {
+          'data-anything': attrs.anything,
+        },
+        ['strong', attrs.anything],
+      ];
     },
   },
 
