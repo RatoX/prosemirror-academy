@@ -125,6 +125,17 @@ const TextAlignmentRightMenuItem = ({
   );
 };
 
+const StatusMenuItem = ({
+  editorView: { state, dispatch },
+  pluginState,
+}: MenuItem<TextAlignmentPluginState>) => {
+  const onClick = useCallback(() => {
+    console.log('is it working');
+  }, [state, dispatch]);
+
+  return <button onClick={onClick}>ADD STATUS</button>;
+};
+
 const MenuBar = ({ editorView, editorPluginStates }: MenuBarProps) => {
   const {
     textFormattingPluginState,
@@ -166,6 +177,10 @@ const MenuBar = ({ editorView, editorPluginStates }: MenuBarProps) => {
         pluginState={textAlignmentPluginState}
       />
       <TextAlignmentRightMenuItem
+        editorView={editorView}
+        pluginState={textAlignmentPluginState}
+      />
+      <StatusMenuItem
         editorView={editorView}
         pluginState={textAlignmentPluginState}
       />

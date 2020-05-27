@@ -1,4 +1,5 @@
 // https://raw.githubusercontent.com/ProseMirror/prosemirror-schema-basic/master/src/schema-basic.js
+//
 import {
   Schema,
   NodeSpec,
@@ -28,6 +29,17 @@ export const nodes: { [key: string]: NodeSpec } = {
     parseDOM: [{ tag: 'p' }],
     toDOM() {
       return ['p', 0];
+    },
+  },
+
+  status: {
+    inline: true,
+    attrs: { anything: { default: 'TODO' } },
+    group: 'inline',
+    toDOM(node) {
+      const attrs = node.attrs;
+
+      return ['span', ['strong', attrs.anything]];
     },
   },
 

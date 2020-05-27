@@ -2,6 +2,7 @@ import { createPluginList } from './plugins';
 import { schema } from './schema';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
+import { Node } from 'prosemirror-model';
 
 type InitProseMirrorEditorViewOptions = {
   onInitEditorView: (
@@ -21,6 +22,28 @@ type InitProseMirrorEditorViewOptions = {
 const plugins = createPluginList({
   schema,
 });
+
+const myDoc = {
+  version: 1,
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'status',
+          attrs: {
+            anything: 'DONE',
+          },
+        },
+        {
+          type: 'text',
+          text: ' Rodrigo Vieira',
+        },
+      ],
+    },
+  ],
+};
 
 export const initProseMirrorEditorView = (
   target: HTMLDivElement,
@@ -45,6 +68,7 @@ export const initProseMirrorEditorView = (
     state: EditorState.create({
       plugins,
       schema,
+      doc: Node.fromJSON(schema, myDoc),
     }),
     /**
      * We are overriding the native dispatch function
