@@ -1,4 +1,4 @@
-import { NodeType, MarkType } from 'prosemirror-model';
+import { NodeType, MarkType, Mark } from 'prosemirror-model';
 import { toggleMark } from 'prosemirror-commands';
 import { Command } from '../../types';
 
@@ -67,7 +67,9 @@ export const createCodeBlock = (): Command => (state, dispatch) => {
 export const createFlowBlock = (): Command => (state, dispatch) => {
   const { tr, selection, schema } = state;
   if (dispatch) {
-    dispatch(tr.insert(selection.from, schema.nodes.flow.createChecked({})));
+    dispatch(
+      tr.insert(selection.from, schema.nodes.flow_graph.createChecked({})),
+    );
     return true;
   }
   return false;
@@ -99,7 +101,7 @@ export const toggleTextAlignment = (
   doc.nodesBetween(selection.from, selection.to, (node, pos) => {
     if (node.type.name === 'paragraph' || node.type.name === 'heading') {
       const marks = node.marks
-        .map((mark) => {
+        .map((mark: Mark) => {
           if (mark.type !== textAlignmentMarkType) {
             return mark;
           }
