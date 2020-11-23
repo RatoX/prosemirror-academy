@@ -137,6 +137,8 @@ export const addFlowElement = (): Command => (state, dispatch) => {
   const selection = state.selection;
   const tr = state.tr; // only do this once at the beginning as accessing state.tr creates a new transaction
 
+  console.log('add flow element');
+
   if (!tr.docChanged) {
     return false;
   }

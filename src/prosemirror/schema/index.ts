@@ -81,6 +81,7 @@ export const nodes: { [key: string]: NodeSpec } = {
 
   flow_graph: {
     group: 'block',
+    selectable: true,
     content: 'flow_content*',
   },
 

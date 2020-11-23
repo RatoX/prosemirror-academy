@@ -143,7 +143,6 @@ const FlowAddElementMenuItem = ({
   editorView: { state, dispatch },
 }: MenuItem<unknown>) => {
   const onClick = useCallback(() => {
-    console.log('add element');
     addFlowElement()(state, dispatch);
   }, [state, dispatch]);
 
