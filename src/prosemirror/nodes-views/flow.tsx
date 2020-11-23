@@ -74,67 +74,88 @@ type FlowViewProps = {
   getNodePosition: boolean | (() => number);
 };
 
+type RenderFlowProps = {
+  dom: HTMLElement;
+  getPosition: () => number;
+  node: PMNode;
+  view: EditorView;
+};
+
+const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
+  const onPaneClick = () => {
+    const position = getPosition();
+    setSelection(view, position);
+  };
+
+  const onElementClick = (_: React.MouseEvent, element: FlowElement) => {
+    const position = getPosition();
+    const { doc } = view.state;
+    const flowGraphNode = doc.nodeAt(position);
+
+    if (!flowGraphNode) {
+      return false;
+    }
+    const elements = convertFlowGraphNodeToElements(flowGraphNode);
+
+    const elementIndex = elements.findIndex(
+      (e: ElementAttributes) => e.id === element.id,
+    );
+    const flowElementPosition = position + elementIndex + 1;
+    const flowElementNode = doc.nodeAt(flowElementPosition);
+    if (!flowElementNode) {
+      return false;
+    }
+
+    setSelection(view, flowElementPosition);
+  };
+
+  ReactDOM.render(
+    <BasicFlow
+      onPaneClick={onPaneClick}
+      onElementClick={onElementClick}
+      elements={convertFlowGraphNodeToElements(node)}
+    />,
+    dom,
+  );
+};
+
 class FlowView implements NodeView {
   dom: HTMLElement;
+  getPosition: () => number;
+  view: EditorView;
 
   constructor({ view, node, getNodePosition }: FlowViewProps) {
     console.log('FlowView Created');
     this.dom = document.createElement('figure');
     this.dom.classList.add('flow');
+    this.view = view;
 
     const getPosition =
       getNodePosition instanceof Function ? getNodePosition : () => 0;
-
-    const onPaneClick = () => {
-      const position = getPosition();
-      setSelection(view, position);
-    };
-
-    const onElementClick = (_: React.MouseEvent, element: FlowElement) => {
-      const position = getPosition();
-      const { doc } = view.state;
-      const flowGraphNode = doc.nodeAt(position);
-
-      if (!flowGraphNode) {
-        return false;
-      }
-      const elements = convertFlowGraphNodeToElements(flowGraphNode);
-
-      const elementIndex = elements.findIndex(
-        (e: ElementAttributes) => e.id === element.id,
-      );
-      const flowElementPosition = position + elementIndex + 1;
-      const flowElementNode = doc.nodeAt(flowElementPosition);
-      if (!flowElementNode) {
-        return false;
-      }
-
-      setSelection(view, flowElementPosition);
-    };
-
-    ReactDOM.render(
-      <BasicFlow
-        onPaneClick={onPaneClick}
-        onElementClick={onElementClick}
-        elements={convertFlowGraphNodeToElements(node)}
-      />,
-      this.dom,
-    );
+    this.getPosition = getPosition;
+    renderFlow({ dom: this.dom, getPosition, node, view });
   }
 
   update(node: PMNode) {
-    console.log('hey', node);
-
+    renderFlow({
+      dom: this.dom,
+      getPosition: this.getPosition,
+      node,
+      view: this.view,
+    });
     return true;
   }
 
   stopEvent(event: Event) {
-    console.log('IS COMING', event);
     return true;
   }
 
   ignoreMutation(mut: MutationRecord | MutationSelection) {
     return true;
+  }
+
+  destroy() {
+    console.log('destroy');
   }
 }
 

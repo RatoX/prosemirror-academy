@@ -1,6 +1,8 @@
 import { NodeType, MarkType, Mark } from 'prosemirror-model';
 import { toggleMark } from 'prosemirror-commands';
 import { Command } from '../../types';
+import { v4 as uuidv4 } from 'uuid';
+import { NodeSelection } from 'prosemirror-state';
 
 // :: (NodeType, ?Object) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
 // Returns a command that tries to set the selected textblocks to the
@@ -137,9 +139,25 @@ export const toggleTextAlignment = (
 export const addFlowElement = (): Command => (state, dispatch) => {
   const doc = state.doc;
   const selection = state.selection;
+  if (
+    !(selection instanceof NodeSelection) ||
+    selection.node.type.name !== 'flow_graph'
+  ) {
+    return false;
+  }
   const tr = state.tr; // only do this once at the beginning as accessing state.tr creates a new transaction
+  const {
+    doc: {
+      type: { schema },
+    },
+  } = state;
+  const flowElement = schema.nodes.flow_element.createAndFill({
+    id: uuidv4(),
+    data: { label: 'New node' },
+    position: { x: 0, y: 0 },
+  });
 
-  console.log('add flow element');
+  tr.insert(selection.from + 1, flowElement);
 
   if (!tr.docChanged) {
     return false;
