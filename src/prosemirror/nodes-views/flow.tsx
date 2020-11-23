@@ -86,6 +86,11 @@ const BasicFlow: React.FC<BasicFlowProps> = ({
   );
 };
 
+const isFlowElementEdge = (flowElement: FlowElement): boolean => {
+  const edge = flowElement as Edge;
+  return Boolean(edge.source && edge.target);
+};
+
 type ConvertElementsToFlowGraphNodeProps = {
   elements: FlowElements;
   schema: Schema;
@@ -98,11 +103,11 @@ const convertElementsToFlowGraphNode = ({
     nodes: { flow_element, flow_edge },
   } = schema;
   const nodes: PMNode[] = elements.map((e: FlowElement) => {
-    if (e.data) {
-      return flow_element.createChecked({ ...e });
+    if (isFlowElementEdge(e)) {
+      return flow_edge.createChecked({ ...e });
     }
 
-    return flow_edge.createChecked({ ...e });
+    return flow_element.createChecked({ ...e });
   });
 
   return Fragment.from(nodes);
@@ -234,6 +239,7 @@ class FlowView implements NodeView {
 
   destroy() {
     console.log('destroy');
+    ReactDOM.unmountComponentAtNode(this.dom);
   }
 }
 
