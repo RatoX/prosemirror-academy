@@ -10,6 +10,7 @@ import ReactFlow, {
   useStoreState,
   Edge,
   Connection,
+  ReactFlowProvider,
 } from 'react-flow-renderer';
 import { Node as PMNode, Fragment, Schema } from 'prosemirror-model';
 import { EditorView, Decoration, NodeView } from 'prosemirror-view';
@@ -29,7 +30,7 @@ const ElementsWatch = () => {
   const elements = useStoreState(state => {
     return state.elements;
   });
-  console.log(elements);
+  //console.log(elements);
   return null;
 };
 
@@ -66,20 +67,22 @@ const BasicFlow: React.FC<BasicFlowProps> = ({
   }, []);
 
   return (
-    <ReactFlow
-      onLoad={onLoad}
-      snapToGrid={true}
-      snapGrid={[15, 15]}
-      elements={elements}
-      maxZoom={1.5}
-      onPaneClick={onPaneClick}
-      onElementClick={onElementClick}
-      onNodeDragStop={onNodeDragStop}
-      onConnect={onConnect}
-    >
-      <ElementsWatch />
-      <Background variant={BackgroundVariant.Lines} />
-    </ReactFlow>
+    <ReactFlowProvider>
+      <ReactFlow
+        onLoad={onLoad}
+        snapToGrid={true}
+        snapGrid={[15, 15]}
+        elements={elements}
+        maxZoom={1.5}
+        onPaneClick={onPaneClick}
+        onElementClick={onElementClick}
+        onNodeDragStop={onNodeDragStop}
+        onConnect={onConnect}
+      >
+        <ElementsWatch />
+        <Background variant={BackgroundVariant.Lines} />
+      </ReactFlow>
+    </ReactFlowProvider>
   );
 };
 
