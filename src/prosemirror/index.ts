@@ -57,14 +57,6 @@ const docJSON = {
             },
           },
         },
-        {
-          type: 'flow_edge',
-          attrs: {
-            id: 'e1-2',
-            source: '1',
-            target: '2',
-          },
-        },
       ],
     },
     {

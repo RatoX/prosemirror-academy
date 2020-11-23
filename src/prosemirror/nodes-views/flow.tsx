@@ -1,14 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactFlow, {
+  addEdge,
   Background,
   BackgroundVariant,
   OnLoadParams,
   FlowElement,
   Elements as FlowElements,
   useStoreState,
+  Edge,
+  Connection,
 } from 'react-flow-renderer';
-import { Node as PMNode } from 'prosemirror-model';
+import { Node as PMNode, Fragment, Schema } from 'prosemirror-model';
 import { EditorView, Decoration, NodeView } from 'prosemirror-view';
 import { NodeSelection } from 'prosemirror-state';
 
@@ -21,12 +24,11 @@ type ElementAttributes = {
   [keyof: string]: any;
 };
 
-const onLoad = (instance: OnLoadParams) => {
-  instance.fitView();
-};
-
-const ElementsDebugger = () => {
-  const elements = useStoreState((state) => state.elements);
+const ElementsWatch = () => {
+  // prettier-ignore
+  const elements = useStoreState(state => {
+    return state.elements;
+  });
   console.log(elements);
   return null;
 };
@@ -35,25 +37,73 @@ type BasicFlowProps = {
   elements: FlowElements;
   onPaneClick: () => void;
   onElementClick: (event: React.MouseEvent, element: FlowElement) => void;
+  onElementsChange: (elements: FlowElements) => void;
 };
 const BasicFlow: React.FC<BasicFlowProps> = ({
   elements,
   onPaneClick,
   onElementClick,
-}) => (
-  <ReactFlow
-    onLoad={onLoad}
-    snapToGrid={true}
-    snapGrid={[15, 15]}
-    elements={elements}
-    maxZoom={1.5}
-    onPaneClick={onPaneClick}
-    onElementClick={onElementClick}
-  >
-    <ElementsDebugger />
-    <Background variant={BackgroundVariant.Lines} />
-  </ReactFlow>
-);
+  onElementsChange,
+}) => {
+  const [instance, setInstance] = React.useState<OnLoadParams>();
+  const onNodeDragStop = React.useCallback(() => {
+    if (!instance) {
+      return;
+    }
+
+    onElementsChange(instance.toObject().elements);
+  }, [instance]);
+  const onConnect = React.useCallback(
+    (edges: Edge | Connection) => {
+      const nextElements = addEdge(edges, elements);
+      onElementsChange(nextElements);
+    },
+    [elements],
+  );
+  const onLoad = React.useCallback((instance: OnLoadParams) => {
+    instance.fitView();
+    setInstance(instance);
+  }, []);
+
+  return (
+    <ReactFlow
+      onLoad={onLoad}
+      snapToGrid={true}
+      snapGrid={[15, 15]}
+      elements={elements}
+      maxZoom={1.5}
+      onPaneClick={onPaneClick}
+      onElementClick={onElementClick}
+      onNodeDragStop={onNodeDragStop}
+      onConnect={onConnect}
+    >
+      <ElementsWatch />
+      <Background variant={BackgroundVariant.Lines} />
+    </ReactFlow>
+  );
+};
+
+type ConvertElementsToFlowGraphNodeProps = {
+  elements: FlowElements;
+  schema: Schema;
+};
+const convertElementsToFlowGraphNode = ({
+  elements,
+  schema,
+}: ConvertElementsToFlowGraphNodeProps): Fragment => {
+  const {
+    nodes: { flow_element, flow_edge },
+  } = schema;
+  const nodes: PMNode[] = elements.map((e: FlowElement) => {
+    if (e.data) {
+      return flow_element.createChecked({ ...e });
+    }
+
+    return flow_edge.createChecked({ ...e });
+  });
+
+  return Fragment.from(nodes);
+};
 
 const convertFlowGraphNodeToElements = (node: PMNode): FlowElements => {
   const elements: ElementAttributes = [];
@@ -90,6 +140,7 @@ type RenderFlowProps = {
 };
 
 const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
+  const schema = view.state.schema;
   const onPaneClick = () => {
     const position = getPosition();
     setSelection(view, position);
@@ -117,10 +168,26 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
     setSelection(view, flowElementPosition);
   };
 
+  const onElementsChange = (elements: FlowElements) => {
+    const fragment = convertElementsToFlowGraphNode({ elements, schema });
+    const position = getPosition();
+    const { tr } = view.state;
+    const flowGraphNode = tr.doc.nodeAt(position);
+
+    if (!flowGraphNode) {
+      return false;
+    }
+
+    tr.replaceWith(position, position + flowGraphNode.nodeSize, fragment);
+
+    view.dispatch(tr);
+  };
+
   ReactDOM.render(
     <BasicFlow
       onPaneClick={onPaneClick}
       onElementClick={onElementClick}
+      onElementsChange={onElementsChange}
       elements={convertFlowGraphNodeToElements(node)}
     />,
     dom,
