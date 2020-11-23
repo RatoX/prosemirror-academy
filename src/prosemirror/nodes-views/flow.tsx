@@ -6,6 +6,7 @@ import ReactFlow, {
   OnLoadParams,
   FlowElement,
   Elements as FlowElements,
+  useStoreState,
 } from 'react-flow-renderer';
 import { Node as PMNode } from 'prosemirror-model';
 import { EditorView, Decoration, NodeView } from 'prosemirror-view';
@@ -22,6 +23,12 @@ type ElementAttributes = {
 
 const onLoad = (instance: OnLoadParams) => {
   instance.fitView();
+};
+
+const ElementsDebugger = () => {
+  const elements = useStoreState((state) => state.elements);
+  console.log(elements);
+  return null;
 };
 
 type BasicFlowProps = {
@@ -43,6 +50,7 @@ const BasicFlow: React.FC<BasicFlowProps> = ({
     onPaneClick={onPaneClick}
     onElementClick={onElementClick}
   >
+    <ElementsDebugger />
     <Background variant={BackgroundVariant.Lines} />
   </ReactFlow>
 );
