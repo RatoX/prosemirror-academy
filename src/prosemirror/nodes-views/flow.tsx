@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactFlow, {
   addEdge,
   Background,
   BackgroundVariant,
-  OnLoadParams,
-  FlowElement,
-  Elements as FlowElements,
-  useStoreState,
-  Edge,
   Connection,
+  Edge,
+  ElementId,
+  Elements as FlowElements,
+  FlowElement,
+  Handle,
+  OnLoadParams,
+  Position,
   ReactFlowProvider,
+  useStoreState,
 } from 'react-flow-renderer';
-import { Node as PMNode, Fragment, Schema } from 'prosemirror-model';
-import { EditorView, Decoration, NodeView } from 'prosemirror-view';
+import { Fragment, Node as PMNode, Schema } from 'prosemirror-model';
+import { Decoration, EditorView, NodeView } from 'prosemirror-view';
 import { NodeSelection } from 'prosemirror-state';
 
 type MutationSelection = {
@@ -25,12 +28,73 @@ type ElementAttributes = {
   [keyof: string]: any;
 };
 
+type CustomTextElementOnChangeProps = {
+  id: ElementId;
+  label: string;
+};
+
+type CustomTextElementOnChange = (
+  props: CustomTextElementOnChangeProps,
+) => void;
+
+type CustomTextElementProps = {
+  id: string;
+  data: {
+    label: string;
+    onChange: CustomTextElementOnChange;
+  };
+};
+
+const CustomTextElement: React.FC<CustomTextElementProps> = (props) => {
+  const [editMode, setEditMode] = useState(false);
+  const { data, id } = props;
+  const onDoubleClick = useCallback(() => {
+    setEditMode(true);
+  }, []);
+
+  const onInputKeyUp = useCallback((evt) => {
+    evt.stopPropagation();
+    evt.preventDefault();
+    if (evt.key !== 'Enter') {
+      return;
+    }
+
+    data.onChange({ id, label: evt.target.value });
+    setEditMode(false);
+  }, []);
+
+  return (
+    <figure className="react-flow__node-default">
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ background: '#555' }}
+      />
+
+      {editMode ? (
+        <input onKeyUp={onInputKeyUp} type="text" />
+      ) : (
+        <span onDoubleClick={onDoubleClick}>{data.label}</span>
+      )}
+
+      <Handle
+        type="target"
+        position={Position.Bottom}
+        style={{ background: '#555' }}
+      />
+    </figure>
+  );
+};
+
+const nodeTypes = {
+  textElement: CustomTextElement,
+};
+
 const ElementsWatch = () => {
   // prettier-ignore
   const elements = useStoreState(state => {
     return state.elements;
   });
-  //console.log(elements);
   return null;
 };
 
@@ -75,6 +139,7 @@ const BasicFlow: React.FC<BasicFlowProps> = ({
         elements={elements}
         maxZoom={1.5}
         onPaneClick={onPaneClick}
+        nodeTypes={nodeTypes}
         onElementClick={onElementClick}
         onNodeDragStop={onNodeDragStop}
         onConnect={onConnect}
@@ -113,12 +178,31 @@ const convertElementsToFlowGraphNode = ({
   return Fragment.from(nodes);
 };
 
-const convertFlowGraphNodeToElements = (node: PMNode): FlowElements => {
+type ConvertFlowGraphNodeToElementsProps = {
+  node: PMNode;
+  onTextChange: (props: CustomTextElementOnChangeProps) => void;
+};
+
+const convertFlowGraphNodeToElements = ({
+  node,
+  onTextChange,
+}: ConvertFlowGraphNodeToElementsProps): FlowElements => {
   const elements: ElementAttributes = [];
   node.forEach((childNode: PMNode) => {
-    const elementAttrs = {
+    let elementAttrs = {
       ...childNode.attrs,
     };
+    if (childNode.type.name === 'flow_text_element') {
+      elementAttrs = {
+        ...elementAttrs,
+        type: 'textElement',
+        data: {
+          ...(elementAttrs.data || {}),
+          onChange: onTextChange,
+        },
+      };
+    }
+
     elements.push(elementAttrs);
   });
 
@@ -154,6 +238,38 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
     setSelection(view, position);
   };
 
+  const onTextChange = (props: CustomTextElementOnChangeProps) => {
+    const position = getPosition();
+    const { doc } = view.state;
+    const flowGraphNode = doc.nodeAt(position);
+
+    if (!flowGraphNode) {
+      return;
+    }
+
+    flowGraphNode.forEach((node, _, elementIndex) => {
+      if (node.attrs.id !== props.id) {
+        return;
+      }
+
+      const flowElementPosition = position + elementIndex + 1;
+      const flowElementNode = doc.nodeAt(flowElementPosition);
+      if (!flowElementNode) {
+        return;
+      }
+
+      const tr = view.state.tr;
+      tr.setNodeMarkup(flowElementPosition, undefined, {
+        ...flowElementNode.attrs,
+        data: {
+          ...flowElementNode.attrs.data,
+          label: props.label,
+        },
+      });
+      view.dispatch(tr);
+    });
+  };
+
   const onElementClick = (_: React.MouseEvent, element: FlowElement) => {
     const position = getPosition();
     const { doc } = view.state;
@@ -162,7 +278,10 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
     if (!flowGraphNode) {
       return false;
     }
-    const elements = convertFlowGraphNodeToElements(flowGraphNode);
+    const elements = convertFlowGraphNodeToElements({
+      node: flowGraphNode,
+      onTextChange,
+    });
 
     const elementIndex = elements.findIndex(
       (e: ElementAttributes) => e.id === element.id,
@@ -196,7 +315,7 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
       onPaneClick={onPaneClick}
       onElementClick={onElementClick}
       onElementsChange={onElementsChange}
-      elements={convertFlowGraphNodeToElements(node)}
+      elements={convertFlowGraphNodeToElements({ node, onTextChange })}
     />,
     dom,
   );

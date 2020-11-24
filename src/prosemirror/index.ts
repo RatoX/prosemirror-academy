@@ -45,6 +45,19 @@ const docJSON = {
           },
         },
         {
+          type: 'flow_text_element',
+          attrs: {
+            id: 'text_element_node_1',
+            data: {
+              label: 'TE NODE',
+            },
+            position: {
+              x: 400,
+              y: 5,
+            },
+          },
+        },
+        {
           type: 'flow_element',
           attrs: {
             id: '2',

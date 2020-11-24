@@ -108,6 +108,28 @@ export const nodes: { [key: string]: NodeSpec } = {
     },
   },
 
+  flow_text_element: {
+    group: 'flow_content',
+    inline: true,
+    selectable: true,
+    attrs: {
+      id: {
+        default: '',
+      },
+      data: {
+        default: {
+          label: 'Default Label',
+        },
+      },
+      position: {
+        default: {
+          x: 0,
+          y: 0,
+        },
+      },
+    },
+  },
+
   flow_edge: {
     group: 'flow_content',
     inline: true,
