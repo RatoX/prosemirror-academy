@@ -3,7 +3,6 @@ import { schema } from './schema';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PMNode } from 'prosemirror-model';
-import { view as flow_graph } from './nodes-views/flow';
 
 type InitProseMirrorEditorViewOptions = {
   onInitEditorView: (
@@ -127,9 +126,6 @@ export const initProseMirrorEditorView = (
       schema,
       doc,
     }),
-    nodeViews: {
-      flow_graph,
-    },
     /**
      * We are overriding the native dispatch function
      * because we will sync the Prosemiror plugin states
