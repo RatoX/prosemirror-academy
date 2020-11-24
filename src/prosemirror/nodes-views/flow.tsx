@@ -42,14 +42,23 @@ type CustomTextElementProps = {
   data: {
     label: string;
     onChange: CustomTextElementOnChange;
+    blurEditorView: () => void;
+    focusEditorView: () => void;
   };
 };
 
 const CustomTextElement: React.FC<CustomTextElementProps> = (props) => {
   const [editMode, setEditMode] = useState(false);
   const { data, id } = props;
+
   const onDoubleClick = useCallback(() => {
     setEditMode(true);
+    data.blurEditorView();
+  }, []);
+
+  const handleInput = useCallback((evt) => {
+    evt.stopPropagation();
+    evt.preventDefault();
   }, []);
 
   const onInputKeyUp = useCallback((evt) => {
@@ -61,6 +70,7 @@ const CustomTextElement: React.FC<CustomTextElementProps> = (props) => {
 
     data.onChange({ id, label: evt.target.value });
     setEditMode(false);
+    data.focusEditorView();
   }, []);
 
   return (
@@ -72,7 +82,7 @@ const CustomTextElement: React.FC<CustomTextElementProps> = (props) => {
       />
 
       {editMode ? (
-        <input onKeyUp={onInputKeyUp} type="text" />
+        <input onInput={handleInput} onKeyUp={onInputKeyUp} type="text" />
       ) : (
         <span onDoubleClick={onDoubleClick}>{data.label}</span>
       )}
@@ -181,6 +191,8 @@ const convertElementsToFlowGraphNode = ({
 type ConvertFlowGraphNodeToElementsProps = {
   node: PMNode;
   onTextChange: (props: CustomTextElementOnChangeProps) => void;
+  blurEditorView: () => void;
+  focusEditorView: () => void;
 };
 
 const convertFlowGraphNodeToElements = ({
@@ -189,9 +201,10 @@ const convertFlowGraphNodeToElements = ({
 }: ConvertFlowGraphNodeToElementsProps): FlowElements => {
   const elements: ElementAttributes = [];
   node.forEach((childNode: PMNode) => {
-    let elementAttrs = {
+    let elementAttrs: any = {
       ...childNode.attrs,
     };
+
     if (childNode.type.name === 'flow_text_element') {
       elementAttrs = {
         ...elementAttrs,
@@ -199,6 +212,12 @@ const convertFlowGraphNodeToElements = ({
         data: {
           ...(elementAttrs.data || {}),
           onChange: onTextChange,
+          blurEditorView: () => {
+            console.log('BLUR');
+          },
+          focusEditorView: () => {
+            console.log('FOCUS');
+          },
         },
       };
     }
@@ -238,6 +257,14 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
     setSelection(view, position);
   };
 
+  const blurEditorView = () => {
+    // view.blur();
+  };
+
+  const focusEditorView = () => {
+    view.focus();
+  };
+
   const onTextChange = (props: CustomTextElementOnChangeProps) => {
     const position = getPosition();
     const { doc } = view.state;
@@ -263,7 +290,7 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
         ...flowElementNode.attrs,
         data: {
           ...flowElementNode.attrs.data,
-          label: props.label,
+          label: props.label.trim() || 'NO TITLE',
         },
       });
       view.dispatch(tr);
@@ -281,6 +308,8 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
     const elements = convertFlowGraphNodeToElements({
       node: flowGraphNode,
       onTextChange,
+      blurEditorView,
+      focusEditorView,
     });
 
     const elementIndex = elements.findIndex(
@@ -315,7 +344,12 @@ const renderFlow = ({ dom, getPosition, node, view }: RenderFlowProps) => {
       onPaneClick={onPaneClick}
       onElementClick={onElementClick}
       onElementsChange={onElementsChange}
-      elements={convertFlowGraphNodeToElements({ node, onTextChange })}
+      elements={convertFlowGraphNodeToElements({
+        node,
+        onTextChange,
+        blurEditorView,
+        focusEditorView,
+      })}
     />,
     dom,
   );
@@ -357,7 +391,6 @@ class FlowView implements NodeView {
   }
 
   destroy() {
-    console.log('destroy');
     ReactDOM.unmountComponentAtNode(this.dom);
   }
 }
