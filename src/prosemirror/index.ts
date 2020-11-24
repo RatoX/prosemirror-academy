@@ -3,7 +3,7 @@ import { schema } from './schema';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PMNode } from 'prosemirror-model';
-import { view as flow } from './nodes-views/flow';
+import { view as flow_graph } from './nodes-views/flow';
 
 type InitProseMirrorEditorViewOptions = {
   onInitEditorView: (
@@ -55,14 +55,6 @@ const docJSON = {
               x: 100,
               y: 100,
             },
-          },
-        },
-        {
-          type: 'flow_edge',
-          attrs: {
-            id: 'e1-2',
-            source: '1',
-            target: '2',
           },
         },
       ],
@@ -123,7 +115,7 @@ export const initProseMirrorEditorView = (
       doc,
     }),
     nodeViews: {
-      flow,
+      flow_graph,
     },
     /**
      * We are overriding the native dispatch function

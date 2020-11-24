@@ -14,7 +14,8 @@
     "react-dom": "^17.0.1",
     "react-flow-renderer": "^8.0.0",
     "react-scripts": "^4.0.0",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "uuid": "^8.3.1"
   },
   "scripts": {
     "lint": "eslint . --ext .js,.ts,.tsx",
@@ -45,6 +46,7 @@
     "@types/prosemirror-view": "^1.16.1",
     "@types/react": "^16.9.55",
     "@types/react-dom": "^16.9.9",
+    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
     "eslint": "^7.12.1",
