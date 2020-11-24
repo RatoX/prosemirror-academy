@@ -6,7 +6,7 @@ import {
   Transaction,
 } from 'prosemirror-state';
 import { FlowPluginState } from '../../../types';
-import { view as flow_graph } from './nodeview';
+import { view as flowGraph } from './nodeview';
 
 export const pluginKey = new PluginKey('flow');
 
@@ -29,7 +29,7 @@ export const createFlowPlugin = (): Plugin<StateField<FlowPluginState>> => {
     },
     props: {
       nodeViews: {
-        flow_graph,
+        flowGraph,
       },
     },
   });

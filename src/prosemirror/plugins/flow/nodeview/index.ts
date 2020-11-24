@@ -52,7 +52,7 @@ class FlowView implements NodeView {
   }
 }
 
-const view = (
+export const view = (
   node: PMNode,
   view: EditorView,
   getPos: boolean | (() => number),
@@ -64,5 +64,3 @@ const view = (
     getNodePosition: getPos,
   });
 };
-
-export { view };

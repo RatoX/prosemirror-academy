@@ -20,14 +20,14 @@ export const convertElementsToFlowGraphNode = ({
   schema,
 }: ConvertElementsToFlowGraphNodeProps): Fragment => {
   const {
-    nodes: { flow_element, flow_edge },
+    nodes: { flowElement, flowEdge },
   } = schema;
   const nodes: PMNode[] = elements.map((e: FlowElement) => {
     if (isFlowElementEdge(e)) {
-      return flow_edge.createChecked({ ...e });
+      return flowEdge.createChecked({ ...e });
     }
 
-    return flow_element.createChecked({ ...e });
+    return flowElement.createChecked({ ...e });
   });
 
   return Fragment.from(nodes);
@@ -49,7 +49,7 @@ export const convertFlowGraphNodeToElements = ({
       ...childNode.attrs,
     };
 
-    if (childNode.type.name === 'flow_text_element') {
+    if (childNode.type.name === 'flowTextElement') {
       elementAttrs = {
         ...elementAttrs,
         type: 'textElement',

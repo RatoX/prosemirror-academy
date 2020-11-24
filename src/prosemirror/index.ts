@@ -28,10 +28,10 @@ const docJSON = {
       ],
     },
     {
-      type: 'flow_graph',
+      type: 'flowGraph',
       content: [
         {
-          type: 'flow_element',
+          type: 'flowElement',
           attrs: {
             id: '1',
             data: {
@@ -44,7 +44,7 @@ const docJSON = {
           },
         },
         {
-          type: 'flow_text_element',
+          type: 'flowTextElement',
           attrs: {
             id: 'text_element_node_1',
             data: {
@@ -57,7 +57,7 @@ const docJSON = {
           },
         },
         {
-          type: 'flow_element',
+          type: 'flowElement',
           attrs: {
             id: '2',
             data: {
