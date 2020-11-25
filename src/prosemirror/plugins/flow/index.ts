@@ -48,9 +48,10 @@ export const createFlowPlugin = (): Plugin<StateField<FlowPluginState>> => {
         if (!(selection instanceof NodeSelection)) {
           return false;
         }
+        const isRemoveNodeAction = ['Backspace', 'Delete'].includes(event.key);
         const { node } = selection;
 
-        return isFlowNode(node);
+        return isFlowNode(node) && !isRemoveNodeAction;
       },
     },
   });

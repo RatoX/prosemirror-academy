@@ -24,7 +24,7 @@ import { FlowEventsContext } from './context';
 import {
   convertFlowGraphNodeToElements,
   convertElementsToFlowGraphNode,
-} from './convertions';
+} from './conversions';
 
 const setSelection = (view: EditorView, position: number) => {
   const { state } = view;
@@ -100,7 +100,6 @@ export const renderFlow = ({
     const position = getPosition();
     const { doc } = view.state;
     const flowGraphNode = doc.nodeAt(position);
-    console.log('dddd');
 
     if (!flowGraphNode) {
       return;

@@ -83,6 +83,7 @@ export const nodes: { [key: string]: NodeSpec } = {
     group: 'block',
     selectable: true,
     atom: true,
+    defining: true,
     content: 'flow_content*',
   },
 
@@ -112,6 +113,7 @@ export const nodes: { [key: string]: NodeSpec } = {
     group: 'flow_content',
     inline: true,
     selectable: true,
+    isolating: true,
     attrs: {
       id: {
         default: '',
@@ -134,6 +136,7 @@ export const nodes: { [key: string]: NodeSpec } = {
     group: 'flow_content',
     inline: true,
     selectable: true,
+    isolating: true,
     attrs: {
       id: {
         default: '',
