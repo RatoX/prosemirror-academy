@@ -7,7 +7,7 @@ import { buildInputRules } from './input-rules';
 import { Plugin } from 'prosemirror-state';
 import { createTextFormattingPlugin } from './text-formatting';
 import { createTextAlignmentPlugin } from './text-alignment';
-// import { createFlowPlugin } from './flow';
+import { createFlowPlugin } from './flow';
 
 const buildKeymap = (schema: Schema): KeymapPluginType => {
   return {
@@ -47,7 +47,7 @@ export const createPluginList = (
     createTextFormattingPlugin(),
     createTextAlignmentPlugin(),
 
-    // createFlowPlugin(),
+    createFlowPlugin(),
   ];
 
   return plugins;

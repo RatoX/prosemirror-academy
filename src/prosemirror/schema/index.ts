@@ -79,14 +79,15 @@ export const nodes: { [key: string]: NodeSpec } = {
     },
   },
 
-  flow_graph: {
+  flowGraph: {
     group: 'block',
     selectable: true,
     atom: true,
+    defining: true,
     content: 'flow_content*',
   },
 
-  flow_element: {
+  flowElement: {
     group: 'flow_content',
     inline: true,
     selectable: true,
@@ -108,10 +109,34 @@ export const nodes: { [key: string]: NodeSpec } = {
     },
   },
 
-  flow_edge: {
+  flowTextElement: {
     group: 'flow_content',
     inline: true,
     selectable: true,
+    isolating: true,
+    attrs: {
+      id: {
+        default: '',
+      },
+      data: {
+        default: {
+          label: 'Default Label',
+        },
+      },
+      position: {
+        default: {
+          x: 0,
+          y: 0,
+        },
+      },
+    },
+  },
+
+  flowEdge: {
+    group: 'flow_content',
+    inline: true,
+    selectable: true,
+    isolating: true,
     attrs: {
       id: {
         default: '',

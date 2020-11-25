@@ -70,7 +70,7 @@ export const createFlowBlock = (): Command => (state, dispatch) => {
   const { tr, selection, schema } = state;
   if (dispatch) {
     dispatch(
-      tr.insert(selection.from, schema.nodes.flow_graph.createChecked({})),
+      tr.insert(selection.from, schema.nodes.flowGraph.createChecked({})),
     );
     return true;
   }
@@ -141,7 +141,7 @@ export const addFlowElement = (): Command => (state, dispatch) => {
   const selection = state.selection;
   if (
     !(selection instanceof NodeSelection) ||
-    selection.node.type.name !== 'flow_graph'
+    selection.node.type.name !== 'flowGraph'
   ) {
     return false;
   }
@@ -151,7 +151,7 @@ export const addFlowElement = (): Command => (state, dispatch) => {
       type: { schema },
     },
   } = state;
-  const flowElement = schema.nodes.flow_element.createAndFill({
+  const flowElement = schema.nodes.flowElement.createAndFill({
     id: uuidv4(),
     data: { label: 'New node' },
     position: { x: 0, y: 0 },
