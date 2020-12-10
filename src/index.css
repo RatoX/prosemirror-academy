@@ -79,3 +79,12 @@ code {
 figure {
   margin: 0;
 }
+
+.flow {
+  margin: 0;
+  height: 300px;
+  background-color: rgb(250, 251, 252);
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.31) 0px 0px 1px 0px;
+  border-radius: 4px;
+}
