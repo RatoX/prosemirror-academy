@@ -22,7 +22,6 @@ export type EditorPluginListOptions = {
 };
 export type EditorDispatch = (tr: Transaction) => void;
 export type EditorContextType = {
-  editorPluginStates: EditorPluginStates;
   editorView: EditorView | null;
 };
 export type Command = (

@@ -1,18 +1,8 @@
-import { createPluginList } from './plugins';
-import { schema } from './schema';
+import { Node as PMNode } from 'prosemirror-model';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-
-type InitProseMirrorEditorViewOptions = {
-  onInitEditorView: (
-    newEditorState: EditorState,
-    plugins: Array<Plugin>,
-  ) => void;
-  onUpdateEditorState: (
-    newEditorState: EditorState,
-    plugins: Array<Plugin>,
-  ) => void;
-};
+import { createPluginList } from './plugins';
+import { schema } from './schema';
 
 /**
  * The plugin list needs to be defined before we mount the EditorView.
@@ -22,12 +12,42 @@ const plugins = createPluginList({
   schema,
 });
 
+type Options = {
+  defaultDocument: Record<string, any> | null;
+};
+
+const placeholderDocument = {
+  type: 'doc',
+  content: [
+    {
+      type: 'heading',
+      attrs: {
+        level: 1,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Your awesome content...',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'It is here',
+        },
+      ],
+    },
+  ],
+};
+
 export const initProseMirrorEditorView = (
   target: HTMLDivElement,
-  options: InitProseMirrorEditorViewOptions,
+  options: Options,
 ): EditorView => {
-  const { onUpdateEditorState, onInitEditorView } = options;
-
+  const { defaultDocument } = options;
   /**
    * The EditorView needs two things to work properly:
    * - DOM Node:
@@ -45,6 +65,7 @@ export const initProseMirrorEditorView = (
     state: EditorState.create({
       plugins,
       schema,
+      doc: PMNode.fromJSON(schema, defaultDocument || placeholderDocument),
     }),
     /**
      * We are overriding the native dispatch function
@@ -64,17 +85,8 @@ export const initProseMirrorEditorView = (
        * Using the new state, the EditorView needs to update the UI to represents the new state.
        */
       editorView.updateState(newEditorState);
-
-      /**
-       * After an update the EditorView we can safely call the callback and let the parent updates the React state
-       */
-      onUpdateEditorState(newEditorState, plugins);
     },
   });
 
-  onInitEditorView(editorView.state, plugins);
-
   return editorView;
 };
-
-export { buildEditorPluginStates } from './plugins';
