@@ -22,6 +22,7 @@ module.exports = {
   ],
   rules: {
     indent: 'off',
+    'no-debugger': 'off',
     'react/prop-types': 'off',
     '@typescript-eslint/indent': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
