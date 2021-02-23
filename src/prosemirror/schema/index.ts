@@ -5,7 +5,7 @@ import {
   Mark,
   MarkSpec,
   DOMOutputSpec,
-  Node as ProseMirrorNode,
+  Node as PMNode,
   MarkType,
 } from 'prosemirror-model';
 
@@ -15,7 +15,6 @@ export const nodes: { [key: string]: NodeSpec } = {
   // :: NodeSpec The top level document node.
   doc: {
     content: 'block+',
-    marks: 'text_align',
   },
 
   // :: NodeSpec The text node.
@@ -48,34 +47,8 @@ export const nodes: { [key: string]: NodeSpec } = {
       { tag: 'h2', attrs: { level: 2 } },
       { tag: 'h3', attrs: { level: 3 } },
     ],
-    toDOM(node: ProseMirrorNode): DOMOutputSpec {
+    toDOM(node: PMNode): DOMOutputSpec {
       return ['h' + node.attrs.level, 0];
-    },
-  },
-
-  // :: NodeSpec A code listing. Disallows marks or non-text inline
-  // nodes by default. Represented as a `<pre>` element with a
-  // `<code>` element inside of it.
-  code_block: {
-    content: 'text*',
-    marks: '',
-    group: 'block',
-    code: true,
-    defining: true,
-    parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' }],
-    toDOM(): DOMOutputSpec {
-      return ['pre', ['code', 0]];
-    },
-  },
-
-  // :: NodeSpec A hard line break, represented in the DOM as `<br>`.
-  hard_break: {
-    inline: true,
-    group: 'inline',
-    selectable: false,
-    parseDOM: [{ tag: 'br' }],
-    toDOM(): DOMOutputSpec {
-      return ['br'];
     },
   },
 };
@@ -116,19 +89,6 @@ export const marks: { [key: string]: MarkSpec } = {
     parseDOM: [{ tag: 'i' }, { tag: 'em' }, { style: 'font-style=italic' }],
     toDOM(): DOMOutputSpec {
       return ['em', 0];
-    },
-  },
-
-  text_align: {
-    attrs: {
-      alignment: {
-        default: null,
-      },
-    },
-    parseDOM: [{ tag: 'div.text-align' }],
-    toDOM(mark: Mark): DOMOutputSpec {
-      const alignment = mark.attrs.alignment;
-      return ['div', { class: `text-align text-align__${alignment}` }, 0];
     },
   },
 };

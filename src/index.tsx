@@ -1,84 +1,97 @@
-import React, { useState, createContext, useRef, useEffect } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import { EditorView } from 'prosemirror-view';
 import { EditorState, Plugin } from 'prosemirror-state';
 import ReactDOM from 'react-dom';
 import { EditorPluginStates, EditorContextType } from './types';
-import MenuBar from './react/ui/MenuBar';
-import {
-  initProseMirrorEditorView,
-  buildEditorPluginStates,
-} from './prosemirror';
+import MenuBar from './menu-bar';
+import { initProseMirrorEditorView } from './prosemirror';
+import { EditorContext } from './context';
 import './index.css';
 
-const { Consumer: EditorConsumer, Provider: EditorProvider } = createContext<
-  EditorContextType
->({
-  editorView: null,
-  editorPluginStates: {},
-});
+const DOCUMENT_KEY = 'editor--academy__document';
 
 const EditorReactMountComponent = ({
-  editorRef,
+  editorDOMTargetRef,
 }: {
-  editorRef: React.RefObject<HTMLDivElement>;
+  editorDOMTargetRef: React.RefObject<HTMLDivElement>;
 }) => {
-  const [editorPluginStates, setEditorPluginStates] = useState<
-    EditorPluginStates
-  >({});
+  const editorViewRef = useRef<EditorView | null>(null);
+  const [editorView, setEditorView] = useState<EditorView>();
+  const [editorState, updateEditorState] = useState<EditorState>();
+  const [savedDocumentJSON, setSavedDocumentJSON] = useState<Record<
+    string,
+    any
+  > | null>(null);
 
-  const editorView = React.useRef<EditorView | null>(null);
+  useLayoutEffect(() => {
+    const x = localStorage.getItem(DOCUMENT_KEY);
+    if (!x) {
+      return;
+    }
+
+    let documentJSON: Record<string, any> | null = null;
+
+    try {
+      documentJSON = JSON.parse(x);
+    } catch (err) {
+      console.error('loading document from localstorage', err);
+    }
+
+    setSavedDocumentJSON(documentJSON);
+  }, []);
 
   useEffect(() => {
-    if (editorRef && editorRef.current) {
-      const target = editorRef.current;
-      const updateEditorPluginState = (
-        newEditorState: EditorState,
-        plugins: Array<Plugin>,
-      ) => {
-        setEditorPluginStates(buildEditorPluginStates(newEditorState, plugins));
-      };
-
-      /*
-       * For now, we have only two lifecycle events: init and update;
-       * We are using those methods to sync the React State with Prosemirror PluginState.
-       *
-       * You will learn more about that, you don't need to know about it to start writting your plugins.
-       * */
-      editorView.current = initProseMirrorEditorView(target, {
-        onUpdateEditorState: updateEditorPluginState,
-        onInitEditorView: updateEditorPluginState,
-      });
-
-      return () => {
-        if (editorView.current) {
-          editorView.current.destroy();
-        }
-      };
+    if (!editorDOMTargetRef || !editorDOMTargetRef.current) {
+      return () => {};
     }
-  }, [editorRef]);
+
+    const target = editorDOMTargetRef.current;
+
+    editorViewRef.current = initProseMirrorEditorView(target, {
+      defaultDocument: savedDocumentJSON,
+      updateEditorState,
+    });
+    setEditorView(editorViewRef.current);
+
+    return () => {
+      if (editorViewRef.current) {
+        editorViewRef.current.destroy();
+      }
+    };
+  }, [editorDOMTargetRef, savedDocumentJSON]);
+
+  const saveContent = useCallback(() => {
+    if (!editorView) {
+      return;
+    }
+
+    const {
+      state: { doc },
+    } = editorView;
+
+    const documentJSON = doc.toJSON();
+    localStorage.setItem(DOCUMENT_KEY, JSON.stringify(documentJSON));
+  }, [editorView]);
+
+  if (!editorView || !editorState) {
+    return null;
+  }
 
   return (
-    <EditorProvider
+    <EditorContext.Provider
       value={{
-        editorPluginStates,
-        editorView: editorView.current,
+        editorState,
+        dispatch: editorView.dispatch,
       }}
     >
-      <EditorConsumer>
-        {({ editorView, editorPluginStates }) => {
-          if (!editorView) {
-            return null;
-          }
-
-          return (
-            <MenuBar
-              editorView={editorView}
-              editorPluginStates={editorPluginStates}
-            />
-          );
-        }}
-      </EditorConsumer>
-    </EditorProvider>
+      <MenuBar onPublish={saveContent} />
+    </EditorContext.Provider>
   );
 };
 
@@ -106,10 +119,10 @@ const App = () => {
   const editorRef = useRef<HTMLDivElement>(document.createElement('div'));
 
   return (
-    <div>
-      <EditorReactMountComponent editorRef={editorRef} />
+    <>
+      <EditorReactMountComponent editorDOMTargetRef={editorRef} />
       <div id="editor" ref={editorRef} />
-    </div>
+    </>
   );
 };
 

@@ -1,16 +1,18 @@
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { gapCursor } from 'prosemirror-gapcursor';
-import { EditorPluginListOptions, KeymapPluginType } from '../../types';
+import { redo, undo, history } from 'prosemirror-history';
 import { Schema } from 'prosemirror-model';
-import { buildInputRules } from './input-rules';
 import { Plugin } from 'prosemirror-state';
+import { buildInputRules } from './input-rules';
+import { EditorPluginListOptions, KeymapPluginType } from '../../types';
 import { createTextFormattingPlugin } from './text-formatting';
-import { createTextAlignmentPlugin } from './text-alignment';
 
 const buildKeymap = (schema: Schema): KeymapPluginType => {
   return {
     'Mod-b': toggleMark(schema.marks.strong),
+    'Mod-z': undo,
+    'Mod-Shift-z': redo,
   };
 };
 
@@ -32,6 +34,7 @@ export const createPluginList = (
    * That is why the order is essential. By default, we always try to add input rules, keymap, external plugins before our plugins.
    */
   const plugins = [
+    history(),
     buildInputRules(options.schema),
     keymap(buildKeymap(options.schema)),
     keymap(baseKeymap),
@@ -44,10 +47,7 @@ export const createPluginList = (
      * If you want to understand what a plugin is, (check this file)[src/prosemirror/plugins/README.md]
      */
     createTextFormattingPlugin(),
-    createTextAlignmentPlugin(),
   ];
 
   return plugins;
 };
-
-export { buildEditorPluginStates } from './build-plugin-states';

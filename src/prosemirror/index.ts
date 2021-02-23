@@ -1,18 +1,8 @@
-import { createPluginList } from './plugins';
-import { schema } from './schema';
+import { Node as PMNode } from 'prosemirror-model';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-
-type InitProseMirrorEditorViewOptions = {
-  onInitEditorView: (
-    newEditorState: EditorState,
-    plugins: Array<Plugin>,
-  ) => void;
-  onUpdateEditorState: (
-    newEditorState: EditorState,
-    plugins: Array<Plugin>,
-  ) => void;
-};
+import { createPluginList } from './plugins';
+import { schema } from './schema';
 
 /**
  * The plugin list needs to be defined before we mount the EditorView.
@@ -22,12 +12,49 @@ const plugins = createPluginList({
   schema,
 });
 
+type Options = {
+  defaultDocument: Record<string, any> | null;
+  updateEditorState: (editorState: EditorState) => void;
+};
+
+const placeholderDocument = {
+  type: 'doc',
+  content: [
+    {
+      type: 'heading',
+      attrs: {
+        level: 1,
+      },
+      content: [
+        {
+          type: 'text',
+          text: 'Your awesome content...',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'It is here',
+        },
+      ],
+    },
+  ],
+};
+
 export const initProseMirrorEditorView = (
   target: HTMLDivElement,
-  options: InitProseMirrorEditorViewOptions,
+  options: Options,
 ): EditorView => {
-  const { onUpdateEditorState, onInitEditorView } = options;
+  const { defaultDocument, updateEditorState } = options;
 
+  const initialEditorState = EditorState.create({
+    plugins,
+    schema,
+    doc: PMNode.fromJSON(schema, defaultDocument || placeholderDocument),
+  });
   /**
    * The EditorView needs two things to work properly:
    * - DOM Node:
@@ -42,10 +69,7 @@ export const initProseMirrorEditorView = (
    * whether to update the EditorState or to dispatch new transactions.
    */
   const editorView = new EditorView(target, {
-    state: EditorState.create({
-      plugins,
-      schema,
-    }),
+    state: initialEditorState,
     /**
      * We are overriding the native dispatch function
      * because we will sync the Prosemiror plugin states
@@ -64,17 +88,11 @@ export const initProseMirrorEditorView = (
        * Using the new state, the EditorView needs to update the UI to represents the new state.
        */
       editorView.updateState(newEditorState);
-
-      /**
-       * After an update the EditorView we can safely call the callback and let the parent updates the React state
-       */
-      onUpdateEditorState(newEditorState, plugins);
+      updateEditorState(newEditorState);
     },
   });
-
-  onInitEditorView(editorView.state, plugins);
+  // First render of editor has no dispatch
+  updateEditorState(initialEditorState);
 
   return editorView;
 };
-
-export { buildEditorPluginStates } from './plugins';

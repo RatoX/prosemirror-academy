@@ -54,6 +54,16 @@ export const toggleStrongMark = (): Command => (state, dispatch) => {
   return toggleMark(strong)(state, dispatch);
 };
 
+export const toggleItalicMark = (): Command => (state, dispatch) => {
+  const {
+    schema: {
+      marks: { em },
+    },
+  } = state;
+
+  return toggleMark(em)(state, dispatch);
+};
+
 export const createCodeBlock = (): Command => (state, dispatch) => {
   const {
     schema: {
@@ -90,7 +100,7 @@ export const toggleTextAlignment = (
   doc.nodesBetween(selection.from, selection.to, (node, pos) => {
     if (node.type.name === 'paragraph' || node.type.name === 'heading') {
       const marks = node.marks
-        .map((mark) => {
+        .map(mark => {
           if (mark.type !== textAlignmentMarkType) {
             return mark;
           }
