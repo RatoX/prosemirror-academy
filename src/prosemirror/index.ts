@@ -41,6 +41,136 @@ const placeholderDocument = {
         },
       ],
     },
+    {
+      type: 'layout',
+      content: [
+        {
+          type: 'layoutSection',
+          attrs: {
+            area: 'side-one',
+          },
+          content: [
+            {
+              type: 'heading',
+              attrs: {
+                level: 1,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: '01 - Side content',
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Some content...',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'layoutSection',
+          attrs: {
+            area: 'middle-one',
+          },
+          content: [
+            {
+              type: 'heading',
+              attrs: {
+                level: 1,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: '02 - Middle up content',
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Some content...',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'layoutSection',
+          attrs: {
+            area: 'middle-two',
+          },
+          content: [
+            {
+              type: 'heading',
+              attrs: {
+                level: 1,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: '03 - Middle down content',
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Some content...',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'layoutSection',
+          attrs: {
+            area: 'side-two',
+          },
+          content: [
+            {
+              type: 'heading',
+              attrs: {
+                level: 1,
+              },
+              content: [
+                {
+                  type: 'text',
+                  text: '04 - Side content',
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Some content...',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'maybe...',
+        },
+      ],
+    },
   ],
 };
 

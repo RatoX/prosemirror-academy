@@ -14,7 +14,7 @@ import {
 export const nodes: { [key: string]: NodeSpec } = {
   // :: NodeSpec The top level document node.
   doc: {
-    content: 'block+',
+    content: '(textBlock | specialBlock)+',
   },
 
   // :: NodeSpec The text node.
@@ -26,7 +26,7 @@ export const nodes: { [key: string]: NodeSpec } = {
   // as a `<p>` element.
   paragraph: {
     content: 'inline*',
-    group: 'block',
+    group: 'textBlock',
     parseDOM: [{ tag: 'p' }],
     toDOM(): DOMOutputSpec {
       return ['p', 0];
@@ -39,8 +39,8 @@ export const nodes: { [key: string]: NodeSpec } = {
   heading: {
     attrs: { level: { default: 1 } },
     content: 'inline*',
-    marks: 'em',
-    group: 'block',
+    marks: 'strong em',
+    group: 'textBlock',
     defining: true,
     parseDOM: [
       { tag: 'h1', attrs: { level: 1 } },
@@ -49,6 +49,57 @@ export const nodes: { [key: string]: NodeSpec } = {
     ],
     toDOM(node: PMNode): DOMOutputSpec {
       return ['h' + node.attrs.level, 0];
+    },
+  },
+
+  layout: {
+    group: 'specialBlock',
+    content: 'layoutSection{4}',
+    parseDOM: [
+      {
+        tag: 'article[data-layout]',
+      },
+    ],
+    toDOM(): DOMOutputSpec {
+      const style = `
+        width: 100%;
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        grid-template-columns: 1fr 3fr 1fr;
+        grid-gap: 8px;
+        justify-items: stretch;
+        align-items: stretch;
+        grid-template-areas: 
+          "side-one middle-one side-two"
+          "side-one middle-two side-two";
+      `;
+      const attrs = { 'data-layout': 'true', style };
+      return ['article', attrs, 0];
+    },
+  },
+
+  layoutSection: {
+    content: 'textBlock*',
+    defining: true,
+    isolating: true,
+    attrs: { area: { default: 'side-one' } },
+    parseDOM: [
+      {
+        tag: 'section[data-layout-section]',
+      },
+    ],
+    toDOM(node: PMNode): DOMOutputSpec {
+      const {
+        attrs: { area },
+      } = node;
+
+      const style = `
+        border: 1px dashed black;
+        grid-area: ${area};
+        padding: 0 8px;
+      `;
+      const attrs = { 'data-layout-section': 'true', style };
+      return ['section', attrs, 0];
     },
   },
 };
