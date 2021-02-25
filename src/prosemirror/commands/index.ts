@@ -132,3 +132,9 @@ export const toggleTextAlignment = (
 
   return true;
 };
+
+export const createLayout: Command = (state, dispatch) => {
+  console.log('nothing yet...');
+
+  return true;
+};
