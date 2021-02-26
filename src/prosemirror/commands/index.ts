@@ -134,7 +134,55 @@ export const toggleTextAlignment = (
 };
 
 export const createLayout: Command = (state, dispatch) => {
-  console.log('nothing yet...');
+  const {
+    tr,
+    schema: {
+      nodes: {
+        layout: layoutSchema,
+        layoutSection: layoutSectionSchema,
+        paragraph: paragraphSchema,
+      },
+    },
+    schema,
+  } = state;
+
+  const layoutSectionSideOne = layoutSectionSchema.createAndFill(
+    {
+      area: 'side-one',
+    },
+    paragraphSchema.createAndFill(),
+  );
+  const layoutSectionMiddleOne = layoutSectionSchema.createAndFill(
+    {
+      area: 'middle-one',
+    },
+    paragraphSchema.createAndFill(),
+  );
+  const layoutSectionMiddleTwo = layoutSectionSchema.createAndFill(
+    {
+      area: 'middle-two',
+    },
+    paragraphSchema.createAndFill(),
+  );
+  const layoutSectionSideTwo = layoutSectionSchema.createAndFill(
+    {
+      area: 'side-two',
+    },
+    paragraphSchema.createAndFill(),
+  );
+
+  const myNewLayoutNode = layoutSchema.createChecked({}, [
+    layoutSectionSideOne,
+    layoutSectionMiddleOne,
+    layoutSectionMiddleTwo,
+    layoutSectionSideTwo,
+  ]);
+
+  tr.replaceSelectionWith(myNewLayoutNode);
+
+  if (dispatch) {
+    dispatch(tr);
+  }
 
   return true;
 };
