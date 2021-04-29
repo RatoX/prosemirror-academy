@@ -7,6 +7,7 @@ import { Plugin } from 'prosemirror-state';
 import { buildInputRules } from './input-rules';
 import { EditorPluginListOptions, KeymapPluginType } from '../../types';
 import { createTextFormattingPlugin } from './text-formatting';
+import { createLayoutPlugin } from './layout';
 
 const buildKeymap = (schema: Schema): KeymapPluginType => {
   return {
@@ -39,6 +40,8 @@ export const createPluginList = (
     keymap(buildKeymap(options.schema)),
     keymap(baseKeymap),
     gapCursor(),
+
+    createLayoutPlugin(),
 
     /**
      * This is the most fundamental plugin that
