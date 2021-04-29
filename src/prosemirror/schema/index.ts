@@ -54,7 +54,7 @@ export const nodes: { [key: string]: NodeSpec } = {
 
   layout: {
     group: 'specialBlock',
-    content: 'layoutSection{4}',
+    content: 'layoutSectionGroup{4}',
     parseDOM: [
       {
         tag: 'article[data-layout]',
@@ -80,6 +80,7 @@ export const nodes: { [key: string]: NodeSpec } = {
 
   layoutSection: {
     content: 'textBlock*',
+    group: 'layoutSectionGroup',
     defining: true,
     isolating: true,
     attrs: { area: { default: 'side-one' } },
@@ -99,6 +100,33 @@ export const nodes: { [key: string]: NodeSpec } = {
         padding: 0 8px;
       `;
       const attrs = { 'data-layout-section': 'true', style };
+      return ['section', attrs, 0];
+    },
+  },
+
+  layoutNumberSection: {
+    content: 'textBlock*',
+    group: 'layoutSectionGroup',
+    defining: true,
+    isolating: true,
+    attrs: { area: { default: 'side-one' } },
+    parseDOM: [
+      {
+        tag: 'section[data-layout-number-section]',
+      },
+    ],
+    toDOM(node: PMNode): DOMOutputSpec {
+      const {
+        attrs: { area },
+      } = node;
+
+      const style = `
+        border: 1px dashed black;
+        grid-area: ${area};
+        padding: 8px;
+        background-color: #BDE0FE;
+      `;
+      const attrs = { 'data-layout-number-section': 'true', style };
       return ['section', attrs, 0];
     },
   },
