@@ -102,29 +102,17 @@ const placeholderDocument = {
           ],
         },
         {
-          type: 'layoutSection',
+          type: 'layoutNumberSection',
           attrs: {
             area: 'middle-two',
           },
           content: [
             {
-              type: 'heading',
-              attrs: {
-                level: 1,
-              },
-              content: [
-                {
-                  type: 'text',
-                  text: '03 - Middle down content',
-                },
-              ],
-            },
-            {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'Some content...',
+                  text: '4815162342',
                 },
               ],
             },
