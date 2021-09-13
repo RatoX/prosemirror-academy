@@ -112,3 +112,7 @@ code {
 .text-align__right {
   text-align: right;
 }
+
+.layout-number-section__invalid {
+  border: 2px solid red !important;
+}
