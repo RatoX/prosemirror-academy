@@ -1,3 +1,4 @@
+import { Node as PMNode } from 'prosemirror-model';
 import { Plugin, PluginKey, Selection } from 'prosemirror-state';
 import { DecorationSet, Decoration } from 'prosemirror-view';
 import { toggleLayoutSection } from '../commands/layout';
@@ -5,6 +6,7 @@ import { toggleLayoutSection } from '../commands/layout';
 type NodePositions = {
   startPos: number;
   endPos: number;
+  node: PMNode;
 };
 const findLayoutNumberSectionParent = (
   selection: Selection,
@@ -28,6 +30,7 @@ const findLayoutNumberSectionParent = (
   return {
     startPos,
     endPos,
+    node: grandParentNode,
   };
 };
 
@@ -43,20 +46,117 @@ export const createLayoutPlugin = (): Plugin => {
       apply: (tr, oldPluginState) => {
         const metadata = tr.getMeta(pluginKey);
         if (!metadata) {
-          return { decorations: DecorationSet.empty };
+          const newDecorations = oldPluginState.decorations.map(
+            tr.mapping,
+            tr.doc,
+          );
+
+          return {
+            decorations: newDecorations,
+          };
         }
+
+        if (metadata.action === 'ADD_HIGHLIGHTS') {
+          type HighlightType = {
+            startPos: number;
+            endPos: number;
+          };
+          const createHighlightDecoration = (
+            highlight: HighlightType,
+          ): Decoration => {
+            const attrs = {
+              class: 'layout-number-section__text-invalid',
+              nodeName: 'mark',
+            };
+            return Decoration.inline(
+              highlight.startPos,
+              highlight.endPos,
+              attrs,
+            );
+          };
+          const decorations = metadata.params.map(createHighlightDecoration);
+
+          const nextDecorationSet = DecorationSet.create(tr.doc, decorations);
+          return {
+            decorations: nextDecorationSet,
+          };
+        }
+
+        if (metadata.action === 'NO_TIE_FOR_YOU') {
+          return {
+            decorations: DecorationSet.empty,
+          };
+        }
+
         const attributes = {
           class: 'layout-number-section__invalid',
         };
+        const { params } = metadata;
         const decoration = Decoration.node(
-          metadata.startPos,
-          metadata.endPos,
+          params.startPos,
+          params.endPos,
           attributes,
         );
         const nextDecorationSet = DecorationSet.create(tr.doc, [decoration]);
         return { decorations: nextDecorationSet };
       },
     },
+
+    appendTransaction(transactions, oldEditorState, newEditorState) {
+      const lastTransaction = transactions[transactions.length - 1];
+      if (!lastTransaction || !lastTransaction.docChanged) {
+        return null;
+      }
+
+      const nodePositions = findLayoutNumberSectionParent(
+        lastTransaction.selection,
+      );
+      if (!nodePositions) {
+        return null;
+      }
+
+      const layoutTextContent = nodePositions.node.textContent;
+      const isValidNumber = !Number.isNaN(Number(layoutTextContent));
+      if (isValidNumber) {
+        return null;
+      }
+
+      type HighlightType = {
+        startPos: number;
+        endPos: number;
+      };
+      const highlights: HighlightType[] = [];
+      newEditorState.doc.nodesBetween(
+        nodePositions.startPos,
+        nodePositions.endPos,
+        (node, textNodePosition) => {
+          if (node.type.name !== 'text') {
+            // keeping looking
+            return true;
+          }
+
+          const findAllNonNumber = /(\D+)/g;
+          const matches = node.textContent.matchAll(findAllNonNumber);
+          for (const match of matches) {
+            if (!match || match.index === undefined) {
+              continue;
+            }
+
+            const startPos = textNodePosition + match.index;
+            const endPos = startPos + match[0].length;
+            highlights.push({
+              startPos,
+              endPos,
+            });
+          }
+        },
+      );
+
+      const tr = newEditorState.tr;
+      tr.setMeta(pluginKey, { action: 'ADD_HIGHLIGHTS', params: highlights });
+      return tr;
+    },
+
     props: {
       decorations(editorState) {
         return pluginKey.getState(editorState).decorations;
@@ -84,7 +184,10 @@ export const createLayoutPlugin = (): Plugin => {
         const isNumberKey = !Number.isNaN(Number(event.key));
         if (!isNumberKey) {
           const { tr } = view.state;
-          tr.setMeta(pluginKey, nodePositions);
+          tr.setMeta(pluginKey, {
+            action: 'ADD_RED_TIE',
+            params: nodePositions,
+          });
           view.dispatch(tr);
           return true;
         }

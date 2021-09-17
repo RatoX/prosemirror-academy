@@ -116,3 +116,9 @@ code {
 .layout-number-section__invalid {
   border: 2px solid red !important;
 }
+
+.layout-number-section__text-invalid {
+  cursor: pointer;
+  background-color: yellow;
+  color: black;
+}
