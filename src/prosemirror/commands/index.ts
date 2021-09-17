@@ -1,6 +1,7 @@
-import { NodeType, MarkType } from 'prosemirror-model';
+import { NodeType, MarkType, Node } from 'prosemirror-model';
 import { toggleMark } from 'prosemirror-commands';
 import { Command } from '../../types';
+import { findParentNodeClosestToPos } from 'prosemirror-utils';
 
 // :: (NodeType, ?Object) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
 // Returns a command that tries to set the selected textblocks to the
@@ -125,6 +126,44 @@ export const toggleTextAlignment = (
   if (!tr.docChanged) {
     return false;
   }
+
+  if (dispatch) {
+    dispatch(tr);
+  }
+
+  return true;
+};
+
+export const createTable: Command = (state, dispatch) => {
+  const {
+    tr,
+    schema: {
+      nodes: { table, tableCell, paragraph },
+    },
+    selection: { $from, from },
+  } = state;
+
+  // Define tableNode
+  const cells = Array(9)
+    .fill(null)
+    .map(() => tableCell.createAndFill({}, paragraph.createAndFill()));
+  const tableNode = table.createChecked({ columns: 3 }, cells);
+
+  // Define insert position
+  let insertPosition = from;
+
+  // Check to see if inserting table inside another table
+  // Using prosemirror-utils libary
+  const predicate = (node: Node): boolean => node.type === table;
+  const parentIsTable = findParentNodeClosestToPos($from, predicate);
+
+  // Change insert position if parent is table to avoid infinite nesting
+  // to be after the parent table.
+  if (parentIsTable) {
+    insertPosition = parentIsTable.pos + parentIsTable.node.nodeSize;
+  }
+
+  tr.insert(insertPosition, tableNode);
 
   if (dispatch) {
     dispatch(tr);
