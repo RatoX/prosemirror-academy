@@ -69,7 +69,7 @@ export const nodes: { [key: string]: NodeSpec } = {
         grid-gap: 8px;
         justify-items: stretch;
         align-items: stretch;
-        grid-template-areas: 
+        grid-template-areas:
           "side-one middle-one side-two"
           "side-one middle-two side-two";
       `;
@@ -168,6 +168,25 @@ export const marks: { [key: string]: MarkSpec } = {
     parseDOM: [{ tag: 'i' }, { tag: 'em' }, { style: 'font-style=italic' }],
     toDOM(): DOMOutputSpec {
       return ['em', 0];
+    },
+  },
+
+  weird: {
+    attrs: {
+      createdAt: { default: null },
+      source: { default: null },
+    },
+    toDOM(mark: Mark): DOMOutputSpec {
+      const createdAt = mark.attrs.createdAt;
+      const source = mark.attrs.source;
+      const message = `Invalid content created at: ${createdAt} and source is ${source}`;
+      const htmlAttrs = {
+        class: 'weird-content',
+        'aria-description': message,
+        'data-created-at': createdAt,
+        'data-source': source,
+      };
+      return ['mark', htmlAttrs, 0];
     },
   },
 };

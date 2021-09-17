@@ -1,3 +1,4 @@
+import { Node as PMNode } from 'prosemirror-model';
 import { Plugin, PluginKey, Selection } from 'prosemirror-state';
 import { DecorationSet, Decoration } from 'prosemirror-view';
 import { toggleLayoutSection } from '../commands/layout';
@@ -5,6 +6,7 @@ import { toggleLayoutSection } from '../commands/layout';
 type NodePositions = {
   startPos: number;
   endPos: number;
+  node: PMNode;
 };
 const findLayoutNumberSectionParent = (
   selection: Selection,
@@ -28,7 +30,62 @@ const findLayoutNumberSectionParent = (
   return {
     startPos,
     endPos,
+    node: grandParentNode,
   };
+};
+
+const isLayoutSection = (node: PMNode) => {
+  return node.type.name === 'layoutSection';
+};
+const isLayoutNumberSection = (node: PMNode) => {
+  return node.type.name === 'layoutNumberSection';
+};
+type TextPosition = {
+  startPos: number;
+  endPos: number;
+};
+const findInvalidTextPositions = (
+  node: PMNode,
+  positionOffset: number,
+): Array<TextPosition> => {
+  const result: Array<TextPosition> = [];
+
+  const findAllNonNumberRegex = /(\D+)/g;
+  const {
+    type: {
+      schema: {
+        marks: { weird: weirdMarkType },
+      },
+    },
+  } = node;
+
+  const callback = (childNode: PMNode, position: number) => {
+    if (!childNode.isText || weirdMarkType.isInSet(childNode.marks)) {
+      return false;
+    }
+
+    const textContent = childNode.text || '';
+    const matches = [...textContent.matchAll(findAllNonNumberRegex)];
+
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      if (!match || match.index === undefined) {
+        continue;
+      }
+
+      const startPos = match.index + position;
+      const endPos = startPos + match[0].length;
+
+      result.push({
+        startPos,
+        endPos,
+      });
+    }
+  };
+
+  node.nodesBetween(0, node.content.size, callback, positionOffset);
+
+  return result;
 };
 
 const pluginKey = new PluginKey('layoutPluginKey');
@@ -65,6 +122,62 @@ export const createLayoutPlugin = (): Plugin => {
         return { decorations: nextDecorationSet };
       },
     },
+
+    appendTransaction(transactions, oldEditorState, newEditorState) {
+      const hasDocumentChanged = transactions.some(tr => tr.docChanged);
+      if (hasDocumentChanged) {
+        return null;
+      }
+
+      const invalidDataPositions: Array<TextPosition> = [];
+      const callback = (node: PMNode, position: number, parentNode: PMNode) => {
+        const isParentANumberSection = isLayoutNumberSection(parentNode);
+        const isParentALayoutSection = isLayoutSection(parentNode);
+
+        if (isParentANumberSection) {
+          const offset = position + 1;
+          const positions: Array<TextPosition> = findInvalidTextPositions(
+            node,
+            offset,
+          );
+          invalidDataPositions.push(...positions);
+        }
+
+        if (isParentANumberSection || isParentALayoutSection) {
+          return false;
+        }
+
+        return true;
+      };
+
+      newEditorState.doc.nodesBetween(
+        0,
+        newEditorState.doc.content.size,
+        callback,
+      );
+
+      const {
+        tr,
+        schema: {
+          marks: { weird: weirdMarkType },
+        },
+      } = newEditorState;
+
+      invalidDataPositions.forEach(textPosition => {
+        const weirdMark = weirdMarkType.create({
+          source: 'unknown',
+          createdAt: new Date().getTime(),
+        });
+        tr.addMark(textPosition.startPos, textPosition.endPos, weirdMark);
+      });
+
+      if (tr.docChanged) {
+        return tr;
+      }
+
+      return null;
+    },
+
     props: {
       decorations(editorState) {
         return pluginKey.getState(editorState).decorations;

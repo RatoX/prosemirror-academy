@@ -21,27 +21,6 @@ const placeholderDocument = {
   type: 'doc',
   content: [
     {
-      type: 'heading',
-      attrs: {
-        level: 1,
-      },
-      content: [
-        {
-          type: 'text',
-          text: 'Your awesome content...',
-        },
-      ],
-    },
-    {
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: 'It is here',
-        },
-      ],
-    },
-    {
       type: 'layout',
       content: [
         {
@@ -51,52 +30,11 @@ const placeholderDocument = {
           },
           content: [
             {
-              type: 'heading',
-              attrs: {
-                level: 1,
-              },
-              content: [
-                {
-                  type: 'text',
-                  text: '01 - Side content',
-                },
-              ],
-            },
-            {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'Some content...',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          type: 'layoutSection',
-          attrs: {
-            area: 'middle-one',
-          },
-          content: [
-            {
-              type: 'heading',
-              attrs: {
-                level: 1,
-              },
-              content: [
-                {
-                  type: 'text',
-                  text: '02 - Middle up content',
-                },
-              ],
-            },
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Some content...',
+                  text: 'ABC',
                 },
               ],
             },
@@ -104,6 +42,23 @@ const placeholderDocument = {
         },
         {
           type: 'layoutNumberSection',
+          attrs: {
+            area: 'middle-one',
+          },
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: '123LOL456',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'layoutSection',
           attrs: {
             area: 'middle-two',
           },
@@ -113,7 +68,7 @@ const placeholderDocument = {
               content: [
                 {
                   type: 'text',
-                  text: '4815162342',
+                  text: 'DEF',
                 },
               ],
             },
@@ -126,36 +81,15 @@ const placeholderDocument = {
           },
           content: [
             {
-              type: 'heading',
-              attrs: {
-                level: 1,
-              },
-              content: [
-                {
-                  type: 'text',
-                  text: '04 - Side content',
-                },
-              ],
-            },
-            {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'Some content...',
+                  text: 'GHI',
                 },
               ],
             },
           ],
-        },
-      ],
-    },
-    {
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: 'maybe...',
         },
       ],
     },

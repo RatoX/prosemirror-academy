@@ -116,3 +116,38 @@ code {
 .layout-number-section__invalid {
   border: 2px solid red !important;
 }
+
+.layout-number-section__text-invalid {
+  cursor: pointer;
+  background-color: yellow;
+  color: black;
+}
+
+.weird-content {
+  position: relative;
+  background-color: yellow;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.weird-content::after {
+  background-color: white;
+  border: 1px solid black;
+  position: absolute;
+  bottom: 105%;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+  content: attr(aria-description);
+  font-size: 0.5rem;
+  padding: 4px;
+  transform: translate3d(-50%, 0, 0);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.weird-content:hover::after,
+.weird-content:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
