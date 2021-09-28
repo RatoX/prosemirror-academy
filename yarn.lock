@@ -30,6 +30,13 @@
     "@babel/runtime" "^7.0.0"
     "@emotion/core" "^10.0.9"
 
+"@atlaskit/codemod-utils@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/codemod-utils/-/codemod-utils-3.4.0.tgz#8ec854b6b935e290eafe701b83167450af9c2efa"
+  integrity sha512-cmKbsIQXA52HhMJf5qau8WZyqwvFvc7ToADa3Omv2KHY3DdBK2KBPg1YWVtw7I+FnzPRBLFyWNVaQTlHsUstew==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
 "@atlaskit/icon@^21.2.4":
   version "21.2.4"
   resolved "https://registry.yarnpkg.com/@atlaskit/icon/-/icon-21.2.4.tgz#3937744f6d2d45d21fcea60c661debab4b83dbaf"
@@ -46,6 +53,17 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
     react-uid "^2.2.0"
+
+"@atlaskit/lozenge@^11.1.2":
+  version "11.1.2"
+  resolved "https://registry.yarnpkg.com/@atlaskit/lozenge/-/lozenge-11.1.2.tgz#b9ac6e97c4300e8762a2fac6a1b12ed3adf26512"
+  integrity sha512-cSSYPFAln4ikadpe92YDOJgYcupysPwvbdd4g+zUFnUQ28PQnNTG7ETYYPLLL+pv+klTuw8A9xT22LV5dkVhOA==
+  dependencies:
+    "@atlaskit/codemod-utils" "^3.4.0"
+    "@atlaskit/theme" "^12.0.0"
+    "@atlaskit/tokens" "^0.2.0"
+    "@babel/runtime" "^7.0.0"
+    "@emotion/core" "^10.0.9"
 
 "@atlaskit/spinner@^15.0.0":
   version "15.0.6"
@@ -64,6 +82,22 @@
     "@babel/runtime" "^7.0.0"
     exenv "^1.2.2"
     prop-types "^15.5.10"
+
+"@atlaskit/theme@^12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.0.0.tgz#f70b9bb2d18fc040ac5197d7636129119138c089"
+  integrity sha512-vrsOU2ZG3j6MKPp/NqqD7CLVL8U6OSD960ZaCypvPWwhqB1ZjDJ6CZXlq7yyHjCZWZbt9o6v12uR9fetwh3jiA==
+  dependencies:
+    "@atlaskit/codemod-utils" "^3.4.0"
+    "@atlaskit/tokens" "^0.2.0"
+    "@babel/runtime" "^7.0.0"
+
+"@atlaskit/tokens@^0.2.0":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-0.2.1.tgz#85b48d52d49688ebaef604949426588ba9c81892"
+  integrity sha512-Fm/F9mOC7QI5OSwvyY5N5+cvhx0lPLPAE5sE520ztb+YOaSiFxHZ13YBJkkdVTtxbGsYayYWITinGDQcCnhLog==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
 
 "@babel/code-frame@7.10.4", "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.5.5":
   version "7.10.4"

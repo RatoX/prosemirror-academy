@@ -151,3 +151,27 @@ code {
   opacity: 1;
   visibility: visible;
 }
+
+.layout-node__toolbar {
+  display: block;
+  grid-column: 1/-1;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: rgb(9 30 66 / 31%) 0px 0px 1px,
+    rgb(9 30 66 / 25%) 0px 4px 8px -2px;
+  padding: 4px 8px;
+  width: fit-content;
+}
+
+.toolbar__separator {
+  background: rgb(235, 236, 240);
+  width: 1px;
+  height: 20px;
+  margin: 0px 4px;
+  align-self: center;
+}

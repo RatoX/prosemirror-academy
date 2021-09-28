@@ -2,91 +2,18 @@ import { Node as PMNode } from 'prosemirror-model';
 import { Plugin, PluginKey, Selection } from 'prosemirror-state';
 import { DecorationSet, Decoration } from 'prosemirror-view';
 import { toggleLayoutSection } from '../commands/layout';
-
-type NodePositions = {
-  startPos: number;
-  endPos: number;
-  node: PMNode;
-};
-const findLayoutNumberSectionParent = (
-  selection: Selection,
-): NodePositions | null => {
-  const $from = selection.$from;
-  if ($from.depth < 3) {
-    return null;
-  }
-
-  const grandParentDepth = $from.depth - 1;
-  const grandParentNode = $from.node(grandParentDepth);
-  const isInsideALayoutNumberSection =
-    grandParentNode && grandParentNode.type.name === 'layoutNumberSection';
-
-  if (!isInsideALayoutNumberSection) {
-    return null;
-  }
-
-  const startPos = $from.before(grandParentDepth);
-  const endPos = startPos + grandParentNode.nodeSize;
-  return {
-    startPos,
-    endPos,
-    node: grandParentNode,
-  };
-};
-
-const isLayoutSection = (node: PMNode) => {
-  return node.type.name === 'layoutSection';
-};
-const isLayoutNumberSection = (node: PMNode) => {
-  return node.type.name === 'layoutNumberSection';
-};
-type TextPosition = {
-  startPos: number;
-  endPos: number;
-};
-const findInvalidTextPositions = (
-  node: PMNode,
-  positionOffset: number,
-): Array<TextPosition> => {
-  const result: Array<TextPosition> = [];
-
-  const findAllNonNumberRegex = /(\D+)/g;
-  const {
-    type: {
-      schema: {
-        marks: { weird: weirdMarkType },
-      },
-    },
-  } = node;
-
-  const callback = (childNode: PMNode, position: number) => {
-    if (!childNode.isText || weirdMarkType.isInSet(childNode.marks)) {
-      return false;
-    }
-
-    const textContent = childNode.text || '';
-    const matches = [...textContent.matchAll(findAllNonNumberRegex)];
-
-    for (let i = 0; i < matches.length; i++) {
-      const match = matches[i];
-      if (!match || match.index === undefined) {
-        continue;
-      }
-
-      const startPos = match.index + position;
-      const endPos = startPos + match[0].length;
-
-      result.push({
-        startPos,
-        endPos,
-      });
-    }
-  };
-
-  node.nodesBetween(0, node.content.size, callback, positionOffset);
-
-  return result;
-};
+import {
+  addRedBorders,
+  hasRedBorderDecorations,
+  addToolbar,
+} from './layout-decorations';
+import type { TextPosition, NodePositions } from './layout-utils';
+import {
+  isLayoutSection,
+  findInvalidTextPositions,
+  findLayoutNumberSectionParent,
+  isLayoutNumberSection,
+} from './layout-utils';
 
 const pluginKey = new PluginKey('layoutPluginKey');
 
@@ -95,31 +22,46 @@ export const createLayoutPlugin = (): Plugin => {
     key: pluginKey,
     state: {
       init: () => {
-        return { decorations: DecorationSet.empty };
+        return { decorationSet: DecorationSet.empty };
       },
       apply: (tr, oldPluginState) => {
         const metadata = tr.getMeta(pluginKey);
+        const currentDecorationSet = oldPluginState.decorationSet;
         if (!metadata) {
-          const newDecorations = oldPluginState.decorations.map(
+          const nextDecorationSet = currentDecorationSet.map(
             tr.mapping,
             tr.doc,
           );
 
+          const decorationSetWithToolbar = addToolbar()({
+            tr,
+            currentDecorationSet: nextDecorationSet,
+          });
+
           return {
-            decorations: newDecorations,
+            decorationSet: decorationSetWithToolbar,
           };
         }
 
-        const attributes = {
-          class: 'layout-number-section__invalid',
-        };
-        const decoration = Decoration.node(
-          metadata.startPos,
-          metadata.endPos,
-          attributes,
-        );
-        const nextDecorationSet = DecorationSet.create(tr.doc, [decoration]);
-        return { decorations: nextDecorationSet };
+        if (metadata.action === 'ADD_RED_BORDER') {
+          const layoutNodePositions = metadata.params;
+
+          return {
+            decorationSet: addRedBorders({ layoutNodePositions })({
+              tr,
+              currentDecorationSet,
+            }),
+          };
+        } else if (metadata.action === 'CLEAN_RED_BORDER') {
+          return {
+            decorationSet: addRedBorders(null)({
+              tr,
+              currentDecorationSet,
+            }),
+          };
+        }
+
+        return oldPluginState;
       },
     },
 
@@ -180,8 +122,9 @@ export const createLayoutPlugin = (): Plugin => {
 
     props: {
       decorations(editorState) {
-        return pluginKey.getState(editorState).decorations;
+        return pluginKey.getState(editorState).decorationSet;
       },
+
       handleKeyDown(view, event) {
         if (event.shiftKey && event.ctrlKey && event.key === 'T') {
           return toggleLayoutSection(view.state, view.dispatch);
@@ -199,13 +142,29 @@ export const createLayoutPlugin = (): Plugin => {
         const isNumber = /^[0-9]$/i.test(event.key);
         const isShorcut = event.metaKey || event.ctrlKey;
         if (isNumber || !isLetter || isShorcut) {
+          const currentDecorationSet = pluginKey.getState(view.state)
+            .decorationSet;
+
+          if (hasRedBorderDecorations(currentDecorationSet)) {
+            const { tr } = view.state;
+            tr.setMeta(pluginKey, {
+              action: 'CLEAN_RED_BORDER',
+              params: nodePositions,
+            });
+
+            view.dispatch(tr);
+          }
+
           return false;
         }
 
         const isNumberKey = !Number.isNaN(Number(event.key));
         if (!isNumberKey) {
           const { tr } = view.state;
-          tr.setMeta(pluginKey, nodePositions);
+          tr.setMeta(pluginKey, {
+            action: 'ADD_RED_BORDER',
+            params: nodePositions,
+          });
           view.dispatch(tr);
           return true;
         }
