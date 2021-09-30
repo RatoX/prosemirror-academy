@@ -3,10 +3,12 @@ import { EditorView } from 'prosemirror-view';
 import Button from '@atlaskit/button/standard-button';
 import BoldIcon from '@atlaskit/icon/glyph/editor/bold';
 import ItalicIcon from '@atlaskit/icon/glyph/editor/italic';
+import EditorTableIcon from '@atlaskit/icon/glyph/editor/table';
 import {
   toggleStrongMark,
   toggleItalicMark,
   createHeading,
+  createTable,
 } from '../prosemirror/commands';
 import { EditorState } from 'prosemirror-state';
 import { EditorDispatch, EditorContextType } from '../types';
@@ -65,6 +67,23 @@ const HeadingButton: ButtonElement = ({ editorState, dispatch }) => {
   );
 };
 
+const TableButton: ButtonElement = ({ editorState, dispatch }) => {
+  const onClick = useCallback(() => {
+    createTable(editorState, dispatch);
+  }, [editorState, dispatch]);
+
+  return (
+    <Button
+      appearance="subtle"
+      onClick={onClick}
+      style={{ fontWeight: 'bold' }}
+      css=""
+    >
+      <EditorTableIcon label="table" size="large" />
+    </Button>
+  );
+};
+
 const FormattingButtons: ButtonElement = ({ editorState, dispatch }) => {
   return (
     <section className="menu-bar__formatting">
@@ -72,6 +91,7 @@ const FormattingButtons: ButtonElement = ({ editorState, dispatch }) => {
       <ToggleItalicButton editorState={editorState} dispatch={dispatch} />
       <div className="menur-bar__formatting-separator" />
       <HeadingButton editorState={editorState} dispatch={dispatch} />
+      <TableButton editorState={editorState} dispatch={dispatch} />
     </section>
   );
 };

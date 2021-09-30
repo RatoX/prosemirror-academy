@@ -112,3 +112,15 @@ code {
 .text-align__right {
   text-align: right;
 }
+
+.table__node {
+  display: grid;
+  grid-template-columns: repeat(var(--table-column-size), 1fr);
+  grid-gap: 1px;
+  background-color: black;
+  border: 1px solid black;
+}
+.table-cell__node {
+  padding: 8px 4px;
+  background-color: white;
+}

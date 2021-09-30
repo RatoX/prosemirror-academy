@@ -8,13 +8,14 @@ import {
   Node as PMNode,
   MarkType,
 } from 'prosemirror-model';
+import { table, tableCell } from './table';
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
 export const nodes: { [key: string]: NodeSpec } = {
   // :: NodeSpec The top level document node.
   doc: {
-    content: 'block+',
+    content: '(textBlock | specialBlock)+',
   },
 
   // :: NodeSpec The text node.
@@ -26,7 +27,7 @@ export const nodes: { [key: string]: NodeSpec } = {
   // as a `<p>` element.
   paragraph: {
     content: 'inline*',
-    group: 'block',
+    group: 'textBlock',
     parseDOM: [{ tag: 'p' }],
     toDOM(): DOMOutputSpec {
       return ['p', 0];
@@ -40,7 +41,7 @@ export const nodes: { [key: string]: NodeSpec } = {
     attrs: { level: { default: 1 } },
     content: 'inline*',
     marks: 'em',
-    group: 'block',
+    group: 'textBlock',
     defining: true,
     parseDOM: [
       { tag: 'h1', attrs: { level: 1 } },
@@ -51,6 +52,8 @@ export const nodes: { [key: string]: NodeSpec } = {
       return ['h' + node.attrs.level, 0];
     },
   },
+  table,
+  tableCell,
 };
 
 // :: Object [Specs](#model.MarkSpec) for the marks in the schema.
