@@ -1,5 +1,4 @@
-import React, { useCallback, useContext } from 'react';
-import { EditorView } from 'prosemirror-view';
+import React, { useCallback } from 'react';
 import Button from '@atlaskit/button/standard-button';
 import BoldIcon from '@atlaskit/icon/glyph/editor/bold';
 import ItalicIcon from '@atlaskit/icon/glyph/editor/italic';
@@ -11,7 +10,7 @@ import {
   createTable,
 } from '../prosemirror/commands';
 import { EditorState } from 'prosemirror-state';
-import { EditorDispatch, EditorContextType } from '../types';
+import { EditorDispatch } from '../types';
 
 type ButtonElement = React.ComponentType<{
   editorState: EditorState;

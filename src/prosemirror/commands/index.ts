@@ -1,6 +1,7 @@
 import { NodeType, MarkType } from 'prosemirror-model';
 import { toggleMark } from 'prosemirror-commands';
 import { Command } from '../../types';
+import { findParentNodeOfSelection } from '../utils';
 
 // :: (NodeType, ?Object) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
 // Returns a command that tries to set the selected textblocks to the
@@ -139,14 +140,23 @@ export const createTable: Command = (state, dispatch) => {
     schema: {
       nodes: { table, tableCell, paragraph },
     },
-    selection: { from: insertPosition },
+    selection: { from },
+    selection,
   } = state;
+
+  let insertPosition = from;
 
   // Define tableNode
   const cells = Array(9)
     .fill(null)
     .map(() => tableCell.createAndFill({}, paragraph.createAndFill()));
   const tableNode = table.createChecked({ columns: 3 }, cells);
+
+  const selectedTable = findParentNodeOfSelection(selection, table);
+
+  if (selectedTable) {
+    insertPosition = selectedTable.endPos;
+  }
 
   tr.insert(insertPosition, tableNode);
 
