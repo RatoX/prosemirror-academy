@@ -17,29 +17,30 @@ type Options = {
   updateEditorState: (editorState: EditorState) => void;
 };
 
-const placeholderDocument = {
-  type: 'doc',
+const tableText = ['1', 'a', '2', 'b', '3', 'c', '4', 'd', '5'];
+const tableCells = tableText.map(char => ({
+  type: 'tableCell',
   content: [
-    {
-      type: 'heading',
-      attrs: {
-        level: 1,
-      },
-      content: [
-        {
-          type: 'text',
-          text: 'Your awesome content...',
-        },
-      ],
-    },
     {
       type: 'paragraph',
       content: [
         {
           type: 'text',
-          text: 'It is here',
+          text: char,
         },
       ],
+    },
+  ],
+}));
+const placeholderDocument = {
+  type: 'doc',
+  content: [
+    {
+      type: 'table',
+      attrs: {
+        columns: 3,
+      },
+      content: tableCells,
     },
   ],
 };

@@ -132,3 +132,27 @@ export const toggleTextAlignment = (
 
   return true;
 };
+
+export const createTable: Command = (state, dispatch) => {
+  const {
+    tr,
+    schema: {
+      nodes: { table, tableCell, paragraph },
+    },
+    selection: { from: insertPosition },
+  } = state;
+
+  // Define tableNode
+  const cells = Array(9)
+    .fill(null)
+    .map(() => tableCell.createAndFill({}, paragraph.createAndFill()));
+  const tableNode = table.createChecked({ columns: 3 }, cells);
+
+  tr.insert(insertPosition, tableNode);
+
+  if (dispatch) {
+    dispatch(tr);
+  }
+
+  return true;
+};

@@ -112,3 +112,24 @@ code {
 .text-align__right {
   text-align: right;
 }
+
+.table__node {
+  display: grid;
+  grid-template-columns: repeat(var(--table-column-size), 1fr);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.table-cell__node {
+  padding: 8px 4px;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.table-cell__node:nth-last-of-type(-n + 3) {
+  border-bottom: 1px solid black;
+}
+
+.table-cell__node:nth-of-type(3n + 0) {
+  border-right: 1px solid black;
+}

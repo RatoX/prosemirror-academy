@@ -33,3 +33,5 @@ export type Command = (
 export type KeymapPluginType = {
   [key: string]: Command;
 };
+
+export type TablePluginState = unknown;
