@@ -6,6 +6,9 @@ import Lozenge from '@atlaskit/lozenge';
 import {
   findLayoutNumberSectionParent,
   findLayoutParent,
+  findLayoutSections,
+  NodePositions,
+  isLayoutNumberSection,
 } from './layout-utils';
 
 type Props = {
@@ -13,6 +16,22 @@ type Props = {
   dispatch: (tr: Transaction) => void;
 };
 export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
+  const sections = findLayoutSections(editorState.selection);
+  let numberSectionAmount = 0;
+  let textSectionAmount = 0;
+
+  sections.forEach(({ node }: NodePositions) => {
+    if (isLayoutNumberSection(node)) {
+      numberSectionAmount++;
+    } else {
+      textSectionAmount++;
+    }
+  });
+
+  const hasOnlyNumbers = sections.length === numberSectionAmount;
+  const hasOnlyText = sections.length === textSectionAmount;
+  const hasMixedContent = !hasOnlyNumbers && !hasOnlyText;
+
   const onTrashClick = useCallback(() => {
     const layoutNodePositions = findLayoutParent(editorState.selection);
     if (!layoutNodePositions) {
@@ -28,23 +47,31 @@ export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
 
     dispatch(tr);
   }, [editorState, dispatch]);
-  const isLayoutNumber = useMemo(() => {
-    return Boolean(findLayoutNumberSectionParent(editorState.selection));
-  }, [editorState.selection]);
 
   return (
     <div className="toolbar">
-      {isLayoutNumber ? (
+      {hasMixedContent && (
+        <Lozenge appearance="moved" isBold>
+          Mixed
+        </Lozenge>
+      )}
+      {hasOnlyNumbers && (
         <Lozenge appearance="inprogress" isBold>
           Number
         </Lozenge>
-      ) : (
+      )}
+      {hasOnlyText && (
         <Lozenge appearance="new" isBold>
           Text
         </Lozenge>
       )}
       <div className="toolbar__separator" />
-      <Button appearance="subtle" spacing="compact" css="">
+      <Button
+        isDisabled={hasMixedContent}
+        appearance="subtle"
+        spacing="compact"
+        css=""
+      >
         Change type
       </Button>
       <div className="toolbar__separator" />

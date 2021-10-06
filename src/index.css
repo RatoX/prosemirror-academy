@@ -175,3 +175,39 @@ code {
   margin: 0px 4px;
   align-self: center;
 }
+
+.layout-node {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-gap: 8px;
+  justify-items: stretch;
+  align-items: stretch;
+  grid-template-areas:
+    'side-one middle-one side-two'
+    'side-one middle-two side-two';
+}
+
+.layout-section-node,
+.layout-number-section-node {
+  grid-area: var(--section-area);
+
+  border-width: 1px;
+  border-color: var(--layout-section-border-color, black);
+  border-style: var(--layout-section-border-style, dashed);
+}
+
+.layout-section-node {
+  padding: 0 8px;
+}
+
+.layout-number-section-node {
+  padding: 8px;
+  background-color: #bde0fe;
+}
+
+.section-selected {
+  --layout-section-border-color: rgb(0, 101, 255);
+  --layout-section-border-style: solid;
+}

@@ -4,7 +4,7 @@ import { Node as PMNode } from 'prosemirror-model';
 import { Transaction, Selection } from 'prosemirror-state';
 import { EditorView, DecorationSet, Decoration } from 'prosemirror-view';
 import { Toolbar } from './layout-toolbar';
-import { findLayoutParent } from './layout-utils';
+import { findLayoutParent, findLayoutSections } from './layout-utils';
 import type { NodePositions } from './layout-utils';
 
 type UpdateDecorationSet = (props: {
@@ -116,4 +116,42 @@ export const addToolbar = (): UpdateDecorationSet => props => {
   const toAddDecorations = [toolBarDecoration];
 
   return nextDecorationSet.add(tr.doc, toAddDecorations);
+};
+
+export const addSelectionBorders = (): UpdateDecorationSet => props => {
+  const { currentDecorationSet, tr } = props;
+
+  const SECTION_DECORATION_KEY = 'layout_section_border__decoration-key';
+  const isSelectionBorderDecoration = (spec: { [key: string]: any }) =>
+    spec && (spec.key || '').startsWith(SECTION_DECORATION_KEY);
+  const toRemoveDecorations: Array<Decoration> = currentDecorationSet.find(
+    undefined,
+    undefined,
+    isSelectionBorderDecoration,
+  );
+
+  const sections = findLayoutSections(tr.selection);
+  const toAddDecorations: Array<Decoration> = sections.map(
+    (nodePositions: NodePositions) => {
+      const { wrappingPositions } = nodePositions;
+      const keyPrefix = `__${nodePositions.wrappingPositions.startPos}`;
+      const spec = {
+        key: SECTION_DECORATION_KEY.concat(keyPrefix),
+      };
+      const attrs = {
+        class: 'section-selected',
+      };
+
+      return Decoration.node(
+        wrappingPositions.startPos,
+        wrappingPositions.endPos,
+        attrs,
+        spec,
+      );
+    },
+  );
+
+  return currentDecorationSet
+    .remove(toRemoveDecorations)
+    .add(tr.doc, toAddDecorations);
 };

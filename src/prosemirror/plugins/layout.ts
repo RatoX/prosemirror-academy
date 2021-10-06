@@ -6,6 +6,7 @@ import {
   addRedBorders,
   hasRedBorderDecorations,
   addToolbar,
+  addSelectionBorders,
 } from './layout-decorations';
 import type { TextPosition, NodePositions } from './layout-utils';
 import {
@@ -38,8 +39,13 @@ export const createLayoutPlugin = (): Plugin => {
             currentDecorationSet: nextDecorationSet,
           });
 
+          const decorationSetWithSelectionBorders = addSelectionBorders()({
+            tr,
+            currentDecorationSet: decorationSetWithToolbar,
+          });
+
           return {
-            decorationSet: decorationSetWithToolbar,
+            decorationSet: decorationSetWithSelectionBorders,
           };
         }
 

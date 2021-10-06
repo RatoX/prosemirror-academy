@@ -61,19 +61,7 @@ export const nodes: { [key: string]: NodeSpec } = {
       },
     ],
     toDOM(): DOMOutputSpec {
-      const style = `
-        width: 100%;
-        display: grid;
-        grid-template-rows: 1fr 1fr;
-        grid-template-columns: 1fr 3fr 1fr;
-        grid-gap: 8px;
-        justify-items: stretch;
-        align-items: stretch;
-        grid-template-areas:
-          "side-one middle-one side-two"
-          "side-one middle-two side-two";
-      `;
-      const attrs = { 'data-layout': 'true', style };
+      const attrs = { 'data-layout': 'true', class: 'layout-node' };
       return ['article', attrs, 0];
     },
   },
@@ -95,11 +83,13 @@ export const nodes: { [key: string]: NodeSpec } = {
       } = node;
 
       const style = `
-        border: 1px dashed black;
-        grid-area: ${area};
-        padding: 0 8px;
+        --section-area: ${area};
       `;
-      const attrs = { 'data-layout-section': 'true', style };
+      const attrs = {
+        'data-layout-section': 'true',
+        style,
+        class: 'layout-section-node',
+      };
       return ['section', attrs, 0];
     },
   },
@@ -121,12 +111,13 @@ export const nodes: { [key: string]: NodeSpec } = {
       } = node;
 
       const style = `
-        border: 1px dashed black;
-        grid-area: ${area};
-        padding: 8px;
-        background-color: #BDE0FE;
+        --section-area: ${area};
       `;
-      const attrs = { 'data-layout-number-section': 'true', style };
+      const attrs = {
+        'data-layout-number-section': 'true',
+        style,
+        class: 'layout-number-section-node',
+      };
       return ['section', attrs, 0];
     },
   },

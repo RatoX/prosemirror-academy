@@ -83,6 +83,39 @@ export const findLayoutNumberSectionParent = (
   };
 };
 
+export const findLayoutSections = (selection: Selection): NodePositions[] => {
+  const { from, to } = selection;
+  const doc = selection.$from.doc;
+
+  const result: NodePositions[] = [];
+
+  const callback = (node: PMNode, position: number) => {
+    if (isLayoutSection(node) || isLayoutNumberSection(node)) {
+      const startPos = position;
+      const endPos = startPos + node.nodeSize;
+
+      const nodePositions: NodePositions = {
+        wrappingPositions: {
+          startPos,
+          endPos,
+        },
+        innerPositions: {
+          startPos: startPos + 1,
+          endPos: endPos - 1,
+        },
+        node,
+      };
+
+      result.push(nodePositions);
+      return false;
+    }
+  };
+
+  doc.nodesBetween(from, to, callback);
+
+  return result;
+};
+
 export const isLayoutSection = (node: PMNode): boolean => {
   return node.type.name === 'layoutSection';
 };
