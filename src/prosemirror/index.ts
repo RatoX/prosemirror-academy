@@ -22,36 +22,19 @@ const placeholderDocument = {
   content: [
     {
       type: 'layout',
+      attrs: {
+        template: 'not-set',
+      },
       content: [
         {
           type: 'layoutSection',
-          attrs: {
-            area: 'side-one',
-          },
           content: [
             {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'ABC',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          type: 'layoutNumberSection',
-          attrs: {
-            area: 'middle-one',
-          },
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: '123LOL456',
+                  text: 'Content 1',
                 },
               ],
             },
@@ -59,16 +42,13 @@ const placeholderDocument = {
         },
         {
           type: 'layoutSection',
-          attrs: {
-            area: 'middle-two',
-          },
           content: [
             {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'DEF',
+                  text: 'Content 2',
                 },
               ],
             },
@@ -76,16 +56,27 @@ const placeholderDocument = {
         },
         {
           type: 'layoutSection',
-          attrs: {
-            area: 'side-two',
-          },
           content: [
             {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'GHI',
+                  text: 'Content 3',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'layoutSection',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Content 4',
                 },
               ],
             },

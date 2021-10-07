@@ -55,13 +55,18 @@ export const nodes: { [key: string]: NodeSpec } = {
   layout: {
     group: 'specialBlock',
     content: 'layoutSectionGroup{4}',
+    attrs: { template: { default: 'not-set' } },
     parseDOM: [
       {
         tag: 'article[data-layout]',
       },
     ],
-    toDOM(): DOMOutputSpec {
-      const attrs = { 'data-layout': 'true', class: 'layout-node' };
+    toDOM(node: PMNode): DOMOutputSpec {
+      const { template } = node.attrs;
+
+      const classNames = `layout-node layout-node__template-${template}`;
+
+      const attrs = { 'data-layout': 'true', class: classNames };
       return ['article', attrs, 0];
     },
   },
@@ -71,23 +76,15 @@ export const nodes: { [key: string]: NodeSpec } = {
     group: 'layoutSectionGroup',
     defining: true,
     isolating: true,
-    attrs: { area: { default: 'side-one' } },
     parseDOM: [
       {
         tag: 'section[data-layout-section]',
       },
     ],
-    toDOM(node: PMNode): DOMOutputSpec {
-      const {
-        attrs: { area },
-      } = node;
-
-      const style = `
-        --section-area: ${area};
-      `;
+    toDOM(): DOMOutputSpec {
       const attrs = {
         'data-layout-section': 'true',
-        style,
+        'data-layout-template-area': 'true',
         class: 'layout-section-node',
       };
       return ['section', attrs, 0];
@@ -99,23 +96,15 @@ export const nodes: { [key: string]: NodeSpec } = {
     group: 'layoutSectionGroup',
     defining: true,
     isolating: true,
-    attrs: { area: { default: 'side-one' } },
     parseDOM: [
       {
         tag: 'section[data-layout-number-section]',
       },
     ],
-    toDOM(node: PMNode): DOMOutputSpec {
-      const {
-        attrs: { area },
-      } = node;
-
-      const style = `
-        --section-area: ${area};
-      `;
+    toDOM(): DOMOutputSpec {
       const attrs = {
         'data-layout-number-section': 'true',
-        style,
+        'data-layout-template-area': 'true',
         class: 'layout-number-section-node',
       };
       return ['section', attrs, 0];

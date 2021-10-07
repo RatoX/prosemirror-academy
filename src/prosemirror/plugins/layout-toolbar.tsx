@@ -1,8 +1,11 @@
-import React, { useMemo, useCallback } from 'react';
-import { EditorState, Transaction } from 'prosemirror-state';
+import React, { useMemo, useCallback, useState } from 'react';
+import { EditorView } from 'prosemirror-view';
+import { Node as PMNode } from 'prosemirror-model';
 import TrashIcon from '@atlaskit/icon/glyph/trash';
 import Button from '@atlaskit/button/standard-button';
 import Lozenge from '@atlaskit/lozenge';
+import { LayoutChangeTemplates } from './layout-change-templates';
+import type { NextTemplateType } from './layout-change-templates';
 import {
   findLayoutNumberSectionParent,
   findLayoutParent,
@@ -12,11 +15,10 @@ import {
 } from './layout-utils';
 
 type Props = {
-  editorState: EditorState;
-  dispatch: (tr: Transaction) => void;
+  editorView: EditorView;
 };
-export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
-  const sections = findLayoutSections(editorState.selection);
+export const Toolbar: React.FC<Props> = ({ editorView }) => {
+  const sections = findLayoutSections(editorView.state.selection);
   let numberSectionAmount = 0;
   let textSectionAmount = 0;
 
@@ -33,6 +35,7 @@ export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
   const hasMixedContent = !hasOnlyNumbers && !hasOnlyText;
 
   const onTrashClick = useCallback(() => {
+    const { state: editorState, dispatch } = editorView;
     const layoutNodePositions = findLayoutParent(editorState.selection);
     if (!layoutNodePositions) {
       return;
@@ -46,7 +49,92 @@ export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
     );
 
     dispatch(tr);
-  }, [editorState, dispatch]);
+  }, [editorView]);
+
+  const onRemoveTemplate = useCallback(() => {
+    const { state: editorState, dispatch } = editorView;
+    const layoutPosition = findLayoutParent(editorState.selection);
+
+    if (!layoutPosition) {
+      return;
+    }
+
+    const { tr } = editorState;
+
+    const nextLayoutAttributes = {
+      ...layoutPosition.node.attrs,
+      template: 'not-set',
+    };
+    tr.setNodeMarkup(
+      layoutPosition.wrappingPositions.startPos,
+      undefined,
+      nextLayoutAttributes,
+    );
+
+    dispatch(tr);
+  }, [editorView]);
+  const onApplyTemplate = useCallback(
+    ({ nextTemplate, sectionsOrder }: NextTemplateType) => {
+      const { state: editorState, dispatch } = editorView;
+      const layoutPosition = findLayoutParent(editorState.selection);
+
+      if (!layoutPosition) {
+        return;
+      }
+
+      const { tr } = editorState;
+
+      const nextLayoutAttributes = {
+        ...layoutPosition.node.attrs,
+        template: nextTemplate,
+      };
+      tr.setNodeMarkup(
+        layoutPosition.wrappingPositions.startPos,
+        undefined,
+        nextLayoutAttributes,
+      );
+
+      type OriginalSectionPositionType = {
+        wrappingPositions: {
+          startPos: number;
+          endPos: number;
+        };
+        node: PMNode;
+      };
+      const originalSections: Array<OriginalSectionPositionType> = [];
+
+      layoutPosition.node.descendants((node, position) => {
+        const startPos = position + layoutPosition.innerPositions.startPos;
+        const endPos = startPos + node.nodeSize;
+
+        originalSections.push({
+          wrappingPositions: {
+            startPos,
+            endPos,
+          },
+          node,
+        });
+
+        return false;
+      });
+
+      for (let i = sectionsOrder.length - 1; i >= 0; i--) {
+        const originalSectionIndexToInsert = sectionsOrder[i];
+
+        const sectionToReplace = originalSections[i];
+        const sectionToInsert = originalSections[originalSectionIndexToInsert];
+
+        tr.replaceRangeWith(
+          sectionToReplace.wrappingPositions.startPos,
+          sectionToReplace.wrappingPositions.endPos,
+          sectionToInsert.node,
+        );
+      }
+
+      dispatch(tr);
+    },
+    [editorView],
+  );
 
   return (
     <div className="toolbar">
@@ -74,6 +162,11 @@ export const Toolbar: React.FC<Props> = ({ editorState, dispatch }) => {
       >
         Change type
       </Button>
+      <div className="toolbar__separator" />
+      <LayoutChangeTemplates
+        onApply={onApplyTemplate}
+        onRemove={onRemoveTemplate}
+      />
       <div className="toolbar__separator" />
       <Button
         onClick={onTrashClick}

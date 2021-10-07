@@ -97,10 +97,7 @@ export const addToolbar = (): UpdateDecorationSet => props => {
     const element = document.createElement('div');
 
     element.classList.add('layout-node__toolbar');
-    ReactDOM.render(
-      <Toolbar editorState={editorView.state} dispatch={editorView.dispatch} />,
-      element,
-    );
+    ReactDOM.render(<Toolbar editorView={editorView} />, element);
 
     return element;
   };
