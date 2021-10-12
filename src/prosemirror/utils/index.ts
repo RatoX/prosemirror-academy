@@ -1,13 +1,19 @@
 import { Node as PMNode, NodeType } from 'prosemirror-model';
 import { Selection } from 'prosemirror-state';
 export { isMarkActive } from './marks';
-export { printRowAndColSum } from './table';
+export {
+  printRowAndColSum,
+  getRangeSum,
+  mapStringToCoordinate,
+  getAreaSum,
+} from './table';
 
 type NodeAndPosition = {
   startPos: number;
   endPos: number;
   node: PMNode;
   depth: number;
+  innerEndPosition: number;
 };
 
 export const findParentNodeOfSelection = (
@@ -20,11 +26,13 @@ export const findParentNodeOfSelection = (
     if (parentNode.type === nodeType) {
       const startPos = $from.before(depth);
       const endPos = startPos + parentNode.nodeSize;
+      const innerEndPosition = $from.end(depth);
       return {
         node: parentNode,
         startPos,
         endPos,
         depth,
+        innerEndPosition,
       };
     }
   }

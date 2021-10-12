@@ -1,6 +1,6 @@
 import { Transaction, EditorState } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
-import { EditorView } from 'prosemirror-view';
+import { DecorationSet, EditorView } from 'prosemirror-view';
 
 export type TextFormattingPluginState = {
   strongDisabled: boolean;
@@ -34,4 +34,13 @@ export type KeymapPluginType = {
   [key: string]: Command;
 };
 
-export type TablePluginState = unknown;
+export type Coordinate = {
+  rowIndex: number;
+  columnIndex: number;
+};
+
+export type TablePluginState = {
+  decorationSet: DecorationSet;
+  startCoord: string;
+  endCoord: string;
+};

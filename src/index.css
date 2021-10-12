@@ -133,3 +133,26 @@ code {
 .table-cell__node:nth-of-type(3n + 0) {
   border-right: 1px solid black;
 }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  padding: 8px;
+  width: fit-content;
+  justify-content: center;
+  margin-top: 8px;
+  box-shadow: rgb(9 30 66 / 31%) 0px 0px 1px,
+    rgb(9 30 66 / 25%) 0px 4px 8px -2px;
+}
+
+.toolbar--field {
+  padding: 8px;
+}
+
+.table__node-toolbar {
+  display: grid;
+  grid-column: 1/-1;
+  align-items: center;
+  justify-items: center;
+}
